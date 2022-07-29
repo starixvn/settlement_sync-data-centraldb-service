@@ -1,9 +1,6 @@
 ﻿using AutoSyncData.Criteria;
 using AutoSyncData.Models;
 using Fanex.Data.Repository;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace AutoSyncData.Services
@@ -42,7 +39,6 @@ namespace AutoSyncData.Services
             {
                 TransInfo = logDetail.TransInfo,
                 TableName = logDetail.TableName
-                //MatchId = logDetail.MatchId
             };
 
             await repository.ExecuteAsync(criteria);

@@ -1,8 +1,5 @@
 ﻿using Fanex.Data;
 using Fanex.Data.Repository;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AutoSyncData.Criteria
 {

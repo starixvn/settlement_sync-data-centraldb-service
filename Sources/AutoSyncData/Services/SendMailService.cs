@@ -1,11 +1,7 @@
-﻿using System.IO;
-using AutoSyncData.Models;
+﻿using AutoSyncData.Models;
 using Fanex.MailDeliver.Model;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
-using RazorEngine;
-using RazorEngine.Templating;
 
 namespace AutoSyncData.Services
 {
@@ -16,16 +12,13 @@ namespace AutoSyncData.Services
 
     public class SendMailServiceImp : SendMailService
     {
-        private readonly IHostingEnvironment environment;
 
         private readonly IConfiguration configuration;
 
         public SendMailServiceImp(
-            IConfiguration configuration,
-            IHostingEnvironment environment)
+            IConfiguration configuration)
         {
             this.configuration = configuration;
-            this.environment = environment;
         }
 
         public void SendMail(LogDetail logDetail)
