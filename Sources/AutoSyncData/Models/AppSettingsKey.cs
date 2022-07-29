@@ -1,4 +1,6 @@
-﻿namespace AutoSyncData.Models
+﻿using System.Collections.Generic;
+
+namespace AutoSyncData.Models
 {
     public class AppSettingsKey
     {
@@ -9,5 +11,7 @@
         public string EnvironmentName { get; set; }
 
         public string DeploymentDelay { get; set; }
+
+        public List<string> SiteDBServer { get; set; }
     }
 }

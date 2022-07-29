@@ -1,38 +1,35 @@
-﻿using Microsoft.Extensions.Configuration;
-using System.Collections.Generic;
+﻿using AutoSyncData.Models;
+using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
 
 namespace AutoSyncData.Services
 {
     public interface AutoSyncDataController
     {
-        Task ProcessAsync();
+        void ProcessAsync();
     }
 
     public class AutoSyncDataControllerImp: AutoSyncDataController
     {
-        private readonly LogDetailService logDetailService;
-
         private readonly SyncDataController syncDataController;
 
-        private readonly IConfiguration configuration;
 
-        public AutoSyncDataControllerImp(LogDetailService logDetailService,
-            SyncDataController syncDataController,
-            IConfiguration configuration)
+        private readonly AppSettingsKey appSettingsKey;
+
+        public AutoSyncDataControllerImp(SyncDataController syncDataController, IOptions<AppSettingsKey> appSettingsKey)
         {
-            this.logDetailService = logDetailService;
             this.syncDataController = syncDataController;
-            this.configuration = configuration;
+            this.appSettingsKey = appSettingsKey.Value;
         }
 
-        public async Task ProcessAsync()
+        public void ProcessAsync()
         {
-            var servers = configuration.GetSection("SiteDBServer").Get<List<string>>();
-            foreach(var server in servers)
-            { 
-                await syncDataController.Process(server);
-            }
+            var servers = appSettingsKey.SiteDBServer;
+            servers.ForEach(server =>
+            {
+                Task.Run(() => syncDataController.Process(server))
+                    .ConfigureAwait(false);
+            });
         }
     }
 }

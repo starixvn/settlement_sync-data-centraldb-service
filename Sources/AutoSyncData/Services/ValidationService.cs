@@ -35,7 +35,7 @@ namespace AutoSyncData.Services
             return await TryValidateTickets(criteria);
         }
 
-        public async Task<bool> TryValidateTickets(ValidateTicketsCriteria criteria)
+        private async Task<bool> TryValidateTickets(ValidateTicketsCriteria criteria)
         {
             for (var i = 0; i < appSettingsKey.RetryCount; i++)
             {

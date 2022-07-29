@@ -1,10 +1,8 @@
 ﻿using AutoSyncData.Criteria;
 using AutoSyncData.Models;
 using Fanex.Data.Repository;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace AutoSyncData.Services
@@ -38,23 +36,20 @@ namespace AutoSyncData.Services
                 DbServer = server
             };
 
-            var lastestLog = await repository.GetAsync<LogDetail>(getLogCriteria);
-            if (lastestLog != null)
+            var lastLog = await repository.GetAsync<LogDetail>(getLogCriteria)?? new LogDetail();
+            
+            lock(lockObject)
             {
-                lock(lockObject)
+                lastLog.DbServer = server;
+
+                if (lastLog.LogId > 0 && poolOfLogs.All(log => log.DbServer != server))
                 {
-                    lastestLog.DbServer = server;
-                    if (!poolOfLogs.Any(log => log.DbServer == server))
-                    {
-                        poolOfLogs.Add(lastestLog);
-                        return lastestLog;
-                    }
-
-                    return null;
+                    poolOfLogs.Add(lastLog);
+                    return lastLog;
                 }
-            }
 
-            return null;
+                return new LogDetail();
+            }
         }
 
         public void RemoveLog(LogDetail logDetail)

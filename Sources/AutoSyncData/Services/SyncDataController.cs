@@ -1,9 +1,4 @@
-﻿using AutoSyncData.Criteria;
-using AutoSyncData.Models;
-using Fanex.Data.Repository;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using AutoSyncData.Models;
 using System.Threading.Tasks;
 using AutoSyncData.Constants;
 using AutoSyncData.Exceptions;
@@ -39,52 +34,52 @@ namespace AutoSyncData.Services
         public async Task Process(string server)
         {
             var logDetail = await logDetailService.GetLastestLog(server);
-
+            var statusId = StatusId.Waiting;
             try
             {
-                if (logDetail != null)
+                if (logDetail.LogId > 0)
                 {
                     var isTicketsValid = await validationService.ValidateTickets(logDetail);
                     if (isTicketsValid)
                     {
-                        logDetail.StatusId = StatusId.Running;
-                        await syncDataService.UpdateLogDetail(logDetail);
-                        var result = await syncDataService.SyncData(logDetail);
-                        if (result == StatusId.Completed)
+                        await UpdateLogDetail(logDetail, StatusId.Running);
+                        statusId = await syncDataService.SyncData(logDetail);
+                        if (statusId == StatusId.Completed)
                         {
-                            logDetail.StatusId = result;
-                            await syncDataService.UpdateLogDetail(logDetail);
+                            await UpdateLogDetail(logDetail, statusId);
                         }
                         else
                         {
-                            logDetail.StatusId = result;
-                            throw new SyncDataFailedException();
+                           throw new SyncDataFailedException();
                         }
                     }
                     else
                     {
-                        logDetail.StatusId = StatusId.Failed;
+                        statusId = StatusId.Failed;
                         throw new InvalidTicketCountException();
                     }
                 }
             }
             catch (SyncDataException exception)
             {
-                await HandleException(exception, logDetail);
+                await HandleException(exception, logDetail, statusId);
             }
             finally
             {
-                if (logDetail != null)
-                {
-                    logDetailService.RemoveLog(logDetail);
-                }
+                logDetailService.RemoveLog(logDetail);
             }
         }
 
-        public async Task HandleException(SyncDataException exception, LogDetail logDetail)
+        private async Task HandleException(SyncDataException exception, LogDetail logDetail, byte statusId)
         {
-            await syncDataService.UpdateLogDetail(logDetail);
+            await UpdateLogDetail(logDetail, statusId);
             sendMailService.SendMail(logDetail, exception.Description);
+        }
+
+        private async Task UpdateLogDetail(LogDetail logDetail, byte statusId)
+        {
+            logDetail.StatusId = statusId;
+            await syncDataService.UpdateLogDetail(logDetail);
         }
     }
 }
