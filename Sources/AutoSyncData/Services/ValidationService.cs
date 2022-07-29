@@ -2,9 +2,6 @@
 using AutoSyncData.Models;
 using Fanex.Data.Repository;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace AutoSyncData.Services

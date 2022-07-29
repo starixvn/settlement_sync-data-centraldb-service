@@ -84,7 +84,7 @@ namespace AutoSyncData.Services
         public async Task HandleException(SyncDataException exception, LogDetail logDetail)
         {
             await syncDataService.UpdateLogDetail(logDetail);
-            sendMailService.SendMail(logDetail);
+            sendMailService.SendMail(logDetail, exception.Description);
         }
     }
 }

@@ -7,7 +7,7 @@ namespace AutoSyncData.Services
 {
     public interface SendMailService
     {
-        void SendMail(LogDetail logDetail);
+        void SendMail(LogDetail logDetail, string message);
     }
 
     public class SendMailServiceImp : SendMailService
@@ -21,14 +21,14 @@ namespace AutoSyncData.Services
             this.configuration = configuration;
         }
 
-        public void SendMail(LogDetail logDetail)
+        public void SendMail(LogDetail logDetail, string message)
         {
             var mailRecord = new MailRecord
             {
                 MailTo = MailTo(),
                 Title = "NAP - Sync Data To Central Db Trans",
                 Subject = Subject(logDetail),
-                Body = MailBody(logDetail)
+                Body = MailBody(logDetail, message)
             };
 
             using var mailClient = new Fanex.MailDeliver.MailClient.API.MailDeliver();
@@ -44,12 +44,12 @@ namespace AutoSyncData.Services
 
         private string MailTo()
         {
-            return configuration.GetSection("EmailGroups:Soccer").Value;
+            return configuration.GetSection("EmailGroup").Value;
         }
 
-        private string MailBody(LogDetail logDetail)
+        private string MailBody(LogDetail logDetail, string message)
         {
-            return JsonConvert.SerializeObject(logDetail);
+            return message + " " + JsonConvert.SerializeObject(logDetail);
         }
     }
 }
