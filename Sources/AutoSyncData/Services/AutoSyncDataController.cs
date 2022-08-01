@@ -24,7 +24,7 @@ namespace AutoSyncData.Services
 
         public void ProcessAsync()
         {
-            var servers = appSettingsKey.SiteDBServer;
+            var servers = appSettingsKey.SiteDbServer;
             servers.ForEach(server =>
             {
                 Task.Run(() => syncDataController.Process(server))

@@ -12,6 +12,6 @@ namespace AutoSyncData.Models
 
         public string DeploymentDelay { get; set; }
 
-        public List<string> SiteDBServer { get; set; }
+        public List<string> SiteDbServer { get; set; }
     }
 }
