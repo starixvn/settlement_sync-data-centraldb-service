@@ -5,7 +5,7 @@
     <Setting Key="NAP_SettlementService_Calculation" SpName="NAP_SettlementService_Calculation" DbName="DBTXN.bodb02.bodbAdminNet" />
   </Function>
   <Function Name="SiteDb">
-    <Setting Key="SiteDB_NAP_SettlementService_CalculationLogSel_SITEDB" SpName="SiteDB_NAP_SettlementService_CalculationLogSel" DbName="SITEDB.bodb02.bodbAdminNet" />
-    <Setting Key="SiteDB_NAP_SettlementService_CalculationLogUpd_SITEDB" SpName="SiteDB_NAP_SettlementService_CalculationLogUpd" DbName="SITEDB.bodb02.bodbAdminNet" />
+    <Setting Key="SiteDB_NAP_SettlementService_CalculationLogSel_SITEDB01" SpName="SiteDB_NAP_SettlementService_CalculationLogSel" DbName="SITEDB01.bodb02.bodbAdminNet" />
+    <Setting Key="SiteDB_NAP_SettlementService_CalculationLogUpd_SITEDB01" SpName="SiteDB_NAP_SettlementService_CalculationLogUpd" DbName="SITEDB01.bodb02.bodbAdminNet" />
   </Function>
 </Functions>
