@@ -11,6 +11,9 @@ namespace AutoSyncData.Criteria
         public byte StatusId { get; set; }
 
         public int MatchId { get; set; }
+
+        public string Action { get; set; }
+
         public override bool IsValid()
         {
             return true;
