@@ -12,7 +12,7 @@ namespace AutoSyncData.Criteria
 
         public override bool IsValid()
         {
-            return !string.IsNullOrEmpty(TransInfo);
+            return true;
         }
 
         public override string GetSettingKey()
