@@ -15,5 +15,9 @@
         public int MatchId { get; set; }
 
         public string Action { get; set; }
+
+        public string SettlementAction { get; set; }
+
+        public string TicketType { get; set; }
     }
 }

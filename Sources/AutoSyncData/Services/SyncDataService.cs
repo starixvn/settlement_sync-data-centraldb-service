@@ -40,7 +40,9 @@ namespace AutoSyncData.Services
                 TransInfo = logDetail.TransInfo,
                 TableName = logDetail.TableName,
                 MatchId = logDetail.MatchId,
-                Action = logDetail.Action
+                Action = logDetail.Action,
+                SettlementAction = logDetail.SettlementAction,
+                TicketType = logDetail.TicketType
             };
 
             await repository.ExecuteAsync(criteria);

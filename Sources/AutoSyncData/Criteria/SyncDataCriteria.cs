@@ -14,6 +14,10 @@ namespace AutoSyncData.Criteria
 
         public string Action { get; set; }
 
+        public string SettlementAction { get; set; }
+
+        public string TicketType { get; set; }
+
         public override bool IsValid()
         {
             return true;
