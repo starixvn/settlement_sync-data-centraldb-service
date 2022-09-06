@@ -39,6 +39,7 @@ namespace AutoSyncData.Services
             {
                 if (logDetail.LogId > 0)
                 {
+                    await UpdateLogDetail(logDetail, statusId);
                     var isTicketsValid = await validationService.ValidateTickets(logDetail);
                     if (isTicketsValid)
                     {
