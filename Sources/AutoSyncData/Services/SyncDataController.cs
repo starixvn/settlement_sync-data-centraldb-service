@@ -43,14 +43,14 @@ namespace AutoSyncData.Services
                     if (isTicketsValid)
                     {
                         await UpdateLogDetail(logDetail, StatusId.Running);
-                        var statusId = await syncDataService.SyncData(logDetail);
+                        var (statusId, errorMessage) = await syncDataService.SyncData(logDetail);
                         if (statusId == StatusId.Completed)
                         {
                             await UpdateLogDetail(logDetail, StatusId.Completed);
                         }
                         else
                         {
-                           throw new SyncDataFailedException();
+                           throw new SyncDataFailedException(errorMessage);
                         }
                     }
                     else

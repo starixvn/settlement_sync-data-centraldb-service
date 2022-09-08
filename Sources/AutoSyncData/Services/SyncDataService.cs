@@ -7,7 +7,7 @@ namespace AutoSyncData.Services
 {
     public interface SyncDataService
     {
-        Task<byte> SyncData(LogDetail logDetail);
+        Task<(byte, string)> SyncData(LogDetail logDetail);
 
         Task UpdateLogDetail(LogDetail logDetail);
     }
@@ -33,7 +33,7 @@ namespace AutoSyncData.Services
             await repository.ExecuteAsync(criteria);
         }
 
-        public async Task<byte> SyncData(LogDetail logDetail)
+        public async Task<(byte, string)> SyncData(LogDetail logDetail)
         {
             var criteria = new SyncDataCriteria
             {
@@ -46,7 +46,7 @@ namespace AutoSyncData.Services
             };
 
             await repository.ExecuteAsync(criteria);
-            return criteria.StatusId;
+            return (criteria.StatusId, criteria.ErrMsg);
         }
     }
 }

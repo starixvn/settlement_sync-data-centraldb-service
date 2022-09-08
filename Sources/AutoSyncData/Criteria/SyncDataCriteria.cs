@@ -18,6 +18,8 @@ namespace AutoSyncData.Criteria
 
         public string TicketType { get; set; }
 
+        public string ErrMsg { get; set; }
+
         public override bool IsValid()
         {
             return true;

@@ -9,9 +9,9 @@ namespace AutoSyncData.Exceptions
         {
         }
 
-        public SyncDataException(string message)
-            : base(message)
+        public SyncDataException(string message) : base(message)
         {
+            Description = message;
         }
 
         public SyncDataException(string message, Exception innerException)
