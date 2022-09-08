@@ -1,6 +1,6 @@
 ﻿using AutoSyncData.Models;
 using Fanex.MailDeliver.Model;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace AutoSyncData.Services
@@ -13,43 +13,27 @@ namespace AutoSyncData.Services
     public class SendMailServiceImp : SendMailService
     {
 
-        private readonly IConfiguration configuration;
+        private readonly AppSettingsKey appSettingsKey;
 
-        public SendMailServiceImp(
-            IConfiguration configuration)
+        public SendMailServiceImp(IOptions<AppSettingsKey> appSettingsKey)
         {
-            this.configuration = configuration;
+            this.appSettingsKey = appSettingsKey.Value;
         }
 
         public void SendMail(LogDetail logDetail, string message)
         {
+            var content = JsonConvert.SerializeObject(logDetail);
             var mailRecord = new MailRecord
             {
-                MailTo = MailTo(),
-                Title = "NAP - Sync Data To Central Db Trans",
-                Subject = Subject(logDetail),
-                Body = MailBody(logDetail, message)
+                MailTo = appSettingsKey.EmailGroup,
+                Title = "NAP - Sync Data To Central DBTrans",
+                Subject = $"[{appSettingsKey.EnvironmentName}] - Sync Data issue - Log Id No. {logDetail.LogId}",
+                Body = $"{message} {content}"
             };
 
             using var mailClient = new Fanex.MailDeliver.MailClient.API.MailDeliver();
 
             mailClient.SendMail(mailRecord);
-        }
-
-        private string Subject(LogDetail logDetail)
-        {
-            return $"Sync Data issue - Log Id No. {logDetail.LogId}";
-
-        }
-
-        private string MailTo()
-        {
-            return configuration.GetSection("EmailGroup").Value;
-        }
-
-        private string MailBody(LogDetail logDetail, string message)
-        {
-            return message + " " + JsonConvert.SerializeObject(logDetail);
         }
     }
 }

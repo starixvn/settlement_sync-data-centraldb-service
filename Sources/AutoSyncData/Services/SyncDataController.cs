@@ -33,21 +33,20 @@ namespace AutoSyncData.Services
 
         public async Task Process(string server)
         {
-            var logDetail = await logDetailService.GetLastestLog(server);
-            var statusId = StatusId.Waiting;
+            var logDetail = await logDetailService.GetLatestLog(server);
             try
             {
                 if (logDetail.LogId > 0)
                 {
-                    await UpdateLogDetail(logDetail, statusId);
+                    await UpdateLogDetail(logDetail, StatusId.Waiting);
                     var isTicketsValid = await validationService.ValidateTickets(logDetail);
                     if (isTicketsValid)
                     {
                         await UpdateLogDetail(logDetail, StatusId.Running);
-                        statusId = await syncDataService.SyncData(logDetail);
+                        var statusId = await syncDataService.SyncData(logDetail);
                         if (statusId == StatusId.Completed)
                         {
-                            await UpdateLogDetail(logDetail, statusId);
+                            await UpdateLogDetail(logDetail, StatusId.Completed);
                         }
                         else
                         {
@@ -56,14 +55,13 @@ namespace AutoSyncData.Services
                     }
                     else
                     {
-                        statusId = StatusId.Failed;
                         throw new InvalidTicketCountException();
                     }
                 }
             }
             catch (SyncDataException exception)
             {
-                await HandleException(exception, logDetail, statusId);
+                await HandleException(exception, logDetail);
             }
             finally
             {
@@ -71,9 +69,9 @@ namespace AutoSyncData.Services
             }
         }
 
-        private async Task HandleException(SyncDataException exception, LogDetail logDetail, byte statusId)
+        private async Task HandleException(SyncDataException exception, LogDetail logDetail)
         {
-            await UpdateLogDetail(logDetail, statusId);
+            await UpdateLogDetail(logDetail, StatusId.Failed);
             sendMailService.SendMail(logDetail, exception.Description);
         }
 

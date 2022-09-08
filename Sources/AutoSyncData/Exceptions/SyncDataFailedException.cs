@@ -7,7 +7,7 @@ namespace AutoSyncData.Exceptions
     {
         public SyncDataFailedException()
         {
-            Description = "Failed to sync data";
+            Description = "Failed to sync data:";
         }
 
         public SyncDataFailedException(string message)

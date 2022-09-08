@@ -7,7 +7,7 @@ namespace AutoSyncData.Exceptions
     {
         public InvalidTicketCountException()
         {
-            Description = "Failed in validation ticket count";
+            Description = "Failed in validation ticket count:";
         }
 
         public InvalidTicketCountException(string message)

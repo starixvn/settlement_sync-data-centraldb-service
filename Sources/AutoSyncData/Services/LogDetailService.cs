@@ -9,7 +9,7 @@ namespace AutoSyncData.Services
 {
     public interface LogDetailService
     {
-        Task<LogDetail> GetLastestLog(string server);
+        Task<LogDetail> GetLatestLog(string server);
 
         void RemoveLog(LogDetail logDetail);
     }
@@ -29,7 +29,7 @@ namespace AutoSyncData.Services
             lockObject = new object();
         }
 
-        public async Task<LogDetail> GetLastestLog(string server)
+        public async Task<LogDetail> GetLatestLog(string server)
         {
             var getLogCriteria = new GetLastestLogCriteria
             {

@@ -5,7 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fanex.Data" Version="4.2.2" />
     <PackageReference Include="Fanex.Data.Repository" Version="4.2.2" />
     <PackageReference Include="Fanex.MailDeliver.MailClient" Version="2.0.7" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
