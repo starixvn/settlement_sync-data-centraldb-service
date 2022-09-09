@@ -12,14 +12,8 @@ namespace AutoSyncData.Criteria
         [SpParam(Ignored = true)]
         public string DbServer { get; set; }
 
-        public override bool IsValid()
-        {
-            return LogId > 0;
-        }
+        public override bool IsValid() => LogId > 0;
 
-        public override string GetSettingKey()
-        {
-            return $"SiteDB_NAP_SettlementService_CalculationLogUpd_{DbServer}";
-        }
+        public override string GetSettingKey() => $"SiteDB_NAP_SettlementService_CalculationLogUpd_{DbServer}";
     }
 }

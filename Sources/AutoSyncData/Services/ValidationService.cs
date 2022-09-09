@@ -29,7 +29,6 @@ namespace AutoSyncData.Services
             {
                 TransInfo = logDetail.TransInfo,
                 TableName = logDetail.TableName,
-                
             };
 
             return await TryValidateTickets(criteria);
@@ -42,7 +41,7 @@ namespace AutoSyncData.Services
                 await repository.ExecuteAsync(criteria);
                 if (criteria.IsPassed)
                 {
-                    return criteria.IsPassed;
+                    return true;
                 }
 
                 if (i < appSettingsKey.RetryCount - 1)
@@ -51,7 +50,7 @@ namespace AutoSyncData.Services
                 }
             }
 
-            return criteria.IsPassed;
+            return false;
         }
     }
 }

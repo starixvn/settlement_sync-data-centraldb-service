@@ -8,8 +8,6 @@ namespace AutoSyncData.Criteria
 
         public string TableName { get; set; }
 
-        public byte StatusId { get; set; }
-
         public int MatchId { get; set; }
 
         public string Action { get; set; }
@@ -18,13 +16,12 @@ namespace AutoSyncData.Criteria
 
         public string TicketType { get; set; }
 
+        public int ErrCode { get; set; }
+
         public string ErrMsg { get; set; }
 
-        public override bool IsValid()
-        {
-            return true;
-        }
-
+        public override bool IsValid() => true;
+        
         public override string GetSettingKey()
         {
             return "NAP_SettlementService_Calculation";

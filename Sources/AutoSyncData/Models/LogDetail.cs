@@ -8,8 +8,6 @@
 
         public string TableName { get; set; }
 
-        public byte StatusId { get; set; }
-
         public string DbServer { get; set; }
 
         public int MatchId { get; set; }

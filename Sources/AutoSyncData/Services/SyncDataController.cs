@@ -1,7 +1,6 @@
 ﻿using AutoSyncData.Models;
 using System.Threading.Tasks;
 using AutoSyncData.Constants;
-using AutoSyncData.Exceptions;
 
 namespace AutoSyncData.Services
 {
@@ -34,51 +33,43 @@ namespace AutoSyncData.Services
         public async Task Process(string server)
         {
             var logDetail = await logDetailService.GetLatestLog(server);
-            try
+
+            if (logDetail.LogId > 0)
             {
-                if (logDetail.LogId > 0)
+                await syncDataService.UpdateLogDetail(logDetail, StatusId.Waiting);
+                var isTicketsValid = await validationService.ValidateTickets(logDetail);
+                if (isTicketsValid)
                 {
-                    await UpdateLogDetail(logDetail, StatusId.Waiting);
-                    var isTicketsValid = await validationService.ValidateTickets(logDetail);
-                    if (isTicketsValid)
-                    {
-                        await UpdateLogDetail(logDetail, StatusId.Running);
-                        var (statusId, errorMessage) = await syncDataService.SyncData(logDetail);
-                        if (statusId == StatusId.Completed)
-                        {
-                            await UpdateLogDetail(logDetail, StatusId.Completed);
-                        }
-                        else
-                        {
-                           throw new SyncDataFailedException(errorMessage);
-                        }
-                    }
-                    else
-                    {
-                        throw new InvalidTicketCountException();
-                    }
+                    await SyncTicketToCentral(logDetail);
+                }
+                else
+                {
+                    await UpdateLogDetailAndSendMail(logDetail, "Failed in validation ticket count");
                 }
             }
-            catch (SyncDataException exception)
+
+            logDetailService.RemoveLog(logDetail);
+        }
+
+        private async Task SyncTicketToCentral(LogDetail logDetail)
+        {
+            await syncDataService.UpdateLogDetail(logDetail, StatusId.Running);
+            var result = await syncDataService.SyncData(logDetail);
+
+            if (result.ErrCode == 0)
             {
-                await HandleException(exception, logDetail);
+                await syncDataService.UpdateLogDetail(logDetail, StatusId.Completed);
             }
-            finally
+            else
             {
-                logDetailService.RemoveLog(logDetail);
+                await UpdateLogDetailAndSendMail(logDetail, $"Failed to sync data: {result.ErrMsg}");
             }
         }
 
-        private async Task HandleException(SyncDataException exception, LogDetail logDetail)
+        private async Task UpdateLogDetailAndSendMail(LogDetail logDetail, string message)
         {
-            await UpdateLogDetail(logDetail, StatusId.Failed);
-            sendMailService.SendMail(logDetail, exception.Description);
-        }
-
-        private async Task UpdateLogDetail(LogDetail logDetail, byte statusId)
-        {
-            logDetail.StatusId = statusId;
-            await syncDataService.UpdateLogDetail(logDetail);
+            await syncDataService.UpdateLogDetail(logDetail, StatusId.Failed);
+            sendMailService.SendMail(logDetail, message);
         }
     }
 }

@@ -7,9 +7,9 @@ namespace AutoSyncData.Services
 {
     public interface SyncDataService
     {
-        Task<(byte, string)> SyncData(LogDetail logDetail);
+        Task<Result> SyncData(LogDetail logDetail);
 
-        Task UpdateLogDetail(LogDetail logDetail);
+        Task UpdateLogDetail(LogDetail logDetail, byte statusId);
     }
 
     public class SyncDataServiceImp: SyncDataService
@@ -21,19 +21,19 @@ namespace AutoSyncData.Services
             this.repository = repository;
         }
 
-        public async Task UpdateLogDetail(LogDetail logDetail)
+        public async Task UpdateLogDetail(LogDetail logDetail, byte statusId)
         {
             var criteria = new UpdateLogCriteria
             {
                 LogId = logDetail.LogId,
-                StatusId = logDetail.StatusId,
+                StatusId = statusId,
                 DbServer = logDetail.DbServer
             };
 
             await repository.ExecuteAsync(criteria);
         }
 
-        public async Task<(byte, string)> SyncData(LogDetail logDetail)
+        public async Task<Result> SyncData(LogDetail logDetail)
         {
             var criteria = new SyncDataCriteria
             {
@@ -46,7 +46,12 @@ namespace AutoSyncData.Services
             };
 
             await repository.ExecuteAsync(criteria);
-            return (criteria.StatusId, criteria.ErrMsg);
+
+            return new Result
+            {
+                ErrCode = criteria.ErrCode,
+                ErrMsg = criteria.ErrMsg
+            };
         }
     }
 }
