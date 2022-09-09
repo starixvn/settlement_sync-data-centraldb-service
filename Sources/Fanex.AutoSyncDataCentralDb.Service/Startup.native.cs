@@ -7,7 +7,7 @@ namespace Fanex.AutoSyncDataCentralDb
 {
     public class Startup
     {
-        public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
