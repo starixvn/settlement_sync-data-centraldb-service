@@ -1,11 +1,7 @@
-﻿using AutoSyncData.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoSyncData.Models;
+﻿using AutoSyncData.Models;
+using AutoSyncData.Services;
 using NSubstitute;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace AutoSyncData.UnitTests.Services
@@ -63,7 +59,7 @@ namespace AutoSyncData.UnitTests.Services
             await service.Process(server);
 
             // Assert
-            await syncDataService.Received(2).UpdateLogDetail(Arg.Any<LogDetail>(), Arg.Any<byte>()); 
+            await syncDataService.Received(2).UpdateLogDetail(Arg.Any<LogDetail>(), Arg.Any<byte>(), Arg.Any<string>());
             sendMailService.Received(1).SendMail(Arg.Any<LogDetail>(), Arg.Any<string>());
             logDetailService.Received(1).RemoveLog(Arg.Any<LogDetail>());
         }
@@ -89,7 +85,7 @@ namespace AutoSyncData.UnitTests.Services
             await service.Process(server);
 
             // Assert
-            await syncDataService.Received(3).UpdateLogDetail(Arg.Any<LogDetail>(), Arg.Any<byte>());
+            await syncDataService.Received(3).UpdateLogDetail(Arg.Any<LogDetail>(), Arg.Any<byte>(), Arg.Any<string>());
             sendMailService.Received(1).SendMail(Arg.Any<LogDetail>(), Arg.Any<string>());
             logDetailService.Received(1).RemoveLog(Arg.Any<LogDetail>());
         }
@@ -115,7 +111,7 @@ namespace AutoSyncData.UnitTests.Services
             await service.Process(server);
 
             // Assert
-            await syncDataService.Received(3).UpdateLogDetail(Arg.Any<LogDetail>(), Arg.Any<byte>());
+            await syncDataService.Received(3).UpdateLogDetail(Arg.Any<LogDetail>(), Arg.Any<byte>(), Arg.Any<string>());
             sendMailService.DidNotReceive().SendMail(Arg.Any<LogDetail>(), Arg.Any<string>());
             logDetailService.Received(1).RemoveLog(Arg.Any<LogDetail>());
         }

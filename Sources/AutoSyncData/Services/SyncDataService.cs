@@ -9,10 +9,10 @@ namespace AutoSyncData.Services
     {
         Task<Result> SyncData(LogDetail logDetail);
 
-        Task UpdateLogDetail(LogDetail logDetail, byte statusId);
+        Task UpdateLogDetail(LogDetail logDetail, byte statusId, string errorMessage);
     }
 
-    public class SyncDataServiceImp: SyncDataService
+    public class SyncDataServiceImp : SyncDataService
     {
         private readonly IDynamicRepository repository;
 
@@ -21,12 +21,13 @@ namespace AutoSyncData.Services
             this.repository = repository;
         }
 
-        public async Task UpdateLogDetail(LogDetail logDetail, byte statusId)
+        public async Task UpdateLogDetail(LogDetail logDetail, byte statusId, string errorMessage)
         {
             var criteria = new UpdateLogCriteria
             {
                 LogId = logDetail.LogId,
                 StatusId = statusId,
+                ErrMsg = errorMessage,
                 DbServer = logDetail.DbServer
             };
 

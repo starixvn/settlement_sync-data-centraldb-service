@@ -1,6 +1,6 @@
-﻿using AutoSyncData.Models;
+﻿using AutoSyncData.Constants;
+using AutoSyncData.Models;
 using System.Threading.Tasks;
-using AutoSyncData.Constants;
 
 namespace AutoSyncData.Services
 {
@@ -36,7 +36,7 @@ namespace AutoSyncData.Services
 
             if (logDetail.LogId > 0)
             {
-                await syncDataService.UpdateLogDetail(logDetail, StatusId.Waiting);
+                await syncDataService.UpdateLogDetail(logDetail, StatusId.Waiting, string.Empty);
                 var isTicketsValid = await validationService.ValidateTickets(logDetail);
                 if (isTicketsValid)
                 {
@@ -53,12 +53,12 @@ namespace AutoSyncData.Services
 
         private async Task SyncTicketToCentral(LogDetail logDetail)
         {
-            await syncDataService.UpdateLogDetail(logDetail, StatusId.Running);
+            await syncDataService.UpdateLogDetail(logDetail, StatusId.Running, string.Empty);
             var result = await syncDataService.SyncData(logDetail);
 
             if (result.ErrCode == 0)
             {
-                await syncDataService.UpdateLogDetail(logDetail, StatusId.Completed);
+                await syncDataService.UpdateLogDetail(logDetail, StatusId.Completed, string.Empty);
             }
             else
             {
@@ -68,7 +68,7 @@ namespace AutoSyncData.Services
 
         private async Task UpdateLogDetailAndSendMail(LogDetail logDetail, string message)
         {
-            await syncDataService.UpdateLogDetail(logDetail, StatusId.Failed);
+            await syncDataService.UpdateLogDetail(logDetail, StatusId.Failed, message);
             sendMailService.SendMail(logDetail, message);
         }
     }
