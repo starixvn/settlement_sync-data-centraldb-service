@@ -6,6 +6,9 @@
   </Function>
   <Function Name="SiteDb">
     <Setting Key="SiteDB_NAP_SettlementService_CalculationLogSel_DBSID01" SpName="SiteDB_NAP_SettlementService_CalculationLogSel" DbName="DBSID01.bodb02.bodbAdminNet" />
+    <Setting Key="SiteDB_NAP_SettlementService_CalculationLogSel_DBSID02" SpName="SiteDB_NAP_SettlementService_CalculationLogSel" DbName="DBSID02.bodb02.bodbAdminNet" />
+
     <Setting Key="SiteDB_NAP_SettlementService_CalculationLogUpd_DBSID01" SpName="SiteDB_NAP_SettlementService_CalculationLogUpd" DbName="DBSID01.bodb02.bodbAdminNet" />
+    <Setting Key="SiteDB_NAP_SettlementService_CalculationLogUpd_DBSID02" SpName="SiteDB_NAP_SettlementService_CalculationLogUpd" DbName="DBSID02.bodb02.bodbAdminNet" />
   </Function>
 </Functions>
