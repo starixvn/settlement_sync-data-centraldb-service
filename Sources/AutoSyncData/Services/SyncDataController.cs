@@ -19,36 +19,45 @@ namespace AutoSyncData.Services
 
         private readonly SendMailService sendMailService;
 
+        private readonly IMaintenanceService maintenanceService;
+
         public SyncDataControllerImp(LogDetailService logDetailService,
             ValidationService validationService,
             SyncDataService syncDataService,
-            SendMailService sendMailService)
+            SendMailService sendMailService,
+            IMaintenanceService maintenanceService)
         {
             this.logDetailService = logDetailService;
             this.validationService = validationService;
             this.syncDataService = syncDataService;
             this.sendMailService = sendMailService;
+            this.maintenanceService = maintenanceService;
         }
 
         public async Task Process(string server)
         {
-            var logDetail = await logDetailService.GetLatestLog(server);
-
-            if (logDetail.LogId > 0)
+            while (!maintenanceService.IsMaintenance)
             {
-                await syncDataService.UpdateLogDetail(logDetail, StatusId.Waiting, string.Empty);
-                var isTicketsValid = await validationService.ValidateTickets(logDetail);
-                if (isTicketsValid)
+                var logDetail = await logDetailService.GetLatestLog(server);
+
+                if (logDetail.LogId > 0)
                 {
-                    await SyncTicketToCentral(logDetail);
+                    await syncDataService.UpdateLogDetail(logDetail, StatusId.Waiting, string.Empty);
+                    var isTicketsValid = await validationService.ValidateTickets(logDetail);
+                    if (isTicketsValid)
+                    {
+                        await SyncTicketToCentral(logDetail);
+                    }
+                    else
+                    {
+                        await UpdateLogDetailAndSendMail(logDetail, "Failed in validation ticket count");
+                    }
                 }
                 else
                 {
-                    await UpdateLogDetailAndSendMail(logDetail, "Failed in validation ticket count");
+                    await Task.Delay(500);
                 }
             }
-
-            logDetailService.RemoveLog(logDetail);
         }
 
         private async Task SyncTicketToCentral(LogDetail logDetail)

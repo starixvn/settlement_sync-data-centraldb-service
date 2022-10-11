@@ -1,8 +1,6 @@
 ﻿using AutoSyncData.Criteria;
 using AutoSyncData.Models;
 using Fanex.Data.Repository;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace AutoSyncData.Services
@@ -10,23 +8,15 @@ namespace AutoSyncData.Services
     public interface LogDetailService
     {
         Task<LogDetail> GetLatestLog(string server);
-
-        void RemoveLog(LogDetail logDetail);
     }
 
     public class LogDetailServiceImp : LogDetailService
     {
         private readonly IDynamicRepository repository;
 
-        private readonly List<LogDetail> poolOfLogs;
-
-        private readonly object lockObject;
-
         public LogDetailServiceImp(IDynamicRepository repository)
         {
             this.repository = repository;
-            poolOfLogs = new List<LogDetail>();
-            lockObject = new object();
         }
 
         public async Task<LogDetail> GetLatestLog(string server)
@@ -36,28 +26,10 @@ namespace AutoSyncData.Services
                 DbServer = server
             };
 
-            var lastLog = await repository.GetAsync<LogDetail>(getLogCriteria)?? new LogDetail();
-            
-            lock(lockObject)
-            {
-                lastLog.DbServer = server;
+            var latestLog = await repository.GetAsync<LogDetail>(getLogCriteria) ?? new LogDetail();
+            latestLog.DbServer = server;
 
-                if (lastLog.LogId > 0 && poolOfLogs.All(log => log.DbServer != server))
-                {
-                    poolOfLogs.Add(lastLog);
-                    return lastLog;
-                }
-
-                return new LogDetail();
-            }
-        }
-
-        public void RemoveLog(LogDetail logDetail)
-        {
-            lock(lockObject)
-            {
-                poolOfLogs.RemoveAll(log => log.LogId == logDetail.LogId && log.DbServer == logDetail.DbServer);
-            }
+            return latestLog;
         }
     }
 }

@@ -13,9 +13,6 @@ namespace AutoSyncData.Criteria
             return $"SiteDB_NAP_SettlementService_CalculationLogSel_{DbServer}";
         }
 
-        public override bool IsValid()
-        {
-            return true;
-        }
+        public override bool IsValid() => !string.IsNullOrWhiteSpace(DbServer);
     }
 }

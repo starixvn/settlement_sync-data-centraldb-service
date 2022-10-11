@@ -9,10 +9,9 @@ namespace AutoSyncData.Services
         void ProcessAsync();
     }
 
-    public class AutoSyncDataControllerImp: AutoSyncDataController
+    public class AutoSyncDataControllerImp : AutoSyncDataController
     {
         private readonly SyncDataController syncDataController;
-
 
         private readonly AppSettingsKey appSettingsKey;
 
@@ -25,7 +24,7 @@ namespace AutoSyncData.Services
         public void ProcessAsync()
         {
             var servers = appSettingsKey.SiteDbServer;
-            
+
             servers.ForEach(server =>
             {
                 Task.Run(() => syncDataController.Process(server))

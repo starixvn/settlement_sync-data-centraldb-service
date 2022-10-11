@@ -1,25 +1,25 @@
 ﻿using AutoSyncData.Services;
+using Fanex.Caching;
 using Fanex.Data;
 using Fanex.Data.SqlServer;
+using Fanex.Logging;
+using Fanex.Logging.Extensions;
+using Fanex.Logging.Extensions.AspNetCore;
+using Fanex.Logging.Extensions.Database;
+using Fanex.Logging.Sentry.RavenClient;
 using Fanex.MailDeliver.MailClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using ONEbook.UM;
+using ONEbook.UM.AspNetCore;
+using ONEbook.UM.Configurations;
+using ONEbook.UM.Transport;
+using SharpRaven;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ONEbook.UM.Configurations;
-using ONEbook.UM;
-using ONEbook.UM.AspNetCore;
-using ONEbook.UM.Transport;
-using Fanex.Caching;
-using Fanex.Logging;
-using Fanex.Logging.Extensions;
-using Fanex.Logging.Extensions.AspNetCore;
-using Fanex.Logging.Extensions.Database;
-using Fanex.Logging.Sentry;
-using Sentry;
 
 namespace Fanex.AutoSyncDataCentralDb
 {
@@ -29,19 +29,12 @@ namespace Fanex.AutoSyncDataCentralDb
 
         private readonly IConfiguration configuration;
 
-        private readonly IMaintenanceService maintenanceService;
-
-        private bool running;
-
-        private int counter;
-
-        public AutoSyncDataService(AutoSyncDataController autoSyncDataController,
-            IConfiguration configuration,
-            IMaintenanceService maintenanceService)
+        public AutoSyncDataService(
+            AutoSyncDataController autoSyncDataController,
+            IConfiguration configuration)
         {
             this.autoSyncDataController = autoSyncDataController;
             this.configuration = configuration;
-            this.maintenanceService = maintenanceService;
             InitializeExtraComponent();
             InitializeSetting();
         }
@@ -70,30 +63,15 @@ namespace Fanex.AutoSyncDataCentralDb
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            running = true;
-            var autoPayoutThread = new Thread(ThreadProcess);
-            Console.WriteLine($"Auto Sync Data Starting at { DateTime.Now }");
-            autoPayoutThread.Start();
+            MainProcess();
+            Console.WriteLine($"Auto Sync Data Starting at {DateTime.Now}");
             return Task.CompletedTask;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            running = false;
-            Console.WriteLine($"Auto Sync Data Stopping at { DateTime.Now }");
+            Console.WriteLine($"Auto Sync Data Stopping at {DateTime.Now}");
             return Task.CompletedTask;
-        }
-
-        private void ThreadProcess()
-        {
-            while (running)
-            {
-                if (!maintenanceService.IsMaintenance)
-                {
-                    MainProcess();
-                    Thread.Sleep(int.Parse(configuration.GetSection("ServiceInterval").Value));
-                }
-            }
         }
 
         private void MainProcess()
@@ -101,23 +79,11 @@ namespace Fanex.AutoSyncDataCentralDb
             try
             {
                 autoSyncDataController.ProcessAsync();
-                HandleGarbageCollector();
             }
             catch (Exception exception)
             {
-                LogService.Error("Exception in main thread - Process:", exception);
+                LogService.Error("AutoSyncDataCentralDb - Exception in main thread - Process:", exception);
             }
-        }
-
-        private void HandleGarbageCollector()
-        {
-            if (counter >= int.Parse(configuration.GetSection("GarbageCollectorInterval").Value))
-            {
-                counter = 0;
-                GC.WaitForPendingFinalizers();
-            }
-
-            counter += int.Parse(configuration.GetSection("ServiceInterval").Value);
         }
 
         private void StartUmSetting()
@@ -148,7 +114,7 @@ namespace Fanex.AutoSyncDataCentralDb
                 .Run();
 
             LogManager
-                .SetDefaultLogCategory(configuration.GetSection("LogCategory").Value)
+                .SetDefaultLogCategory(configuration.GetSection("SiteCategory").Value)
                 .Use(new List<ILogEngine>
                 {
                     new SentryLogging(new SentryEngineOptions
