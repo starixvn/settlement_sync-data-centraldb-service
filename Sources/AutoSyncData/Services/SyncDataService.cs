@@ -1,58 +1,56 @@
 ﻿using AutoSyncData.Criteria;
 using AutoSyncData.Models;
 using Fanex.Data.Repository;
-using System.Threading.Tasks;
 
-namespace AutoSyncData.Services
+namespace AutoSyncData.Services;
+
+public interface SyncDataService
 {
-    public interface SyncDataService
-    {
-        Task<Result> SyncData(LogDetail logDetail);
+    Task<Result> SyncData(LogDetail logDetail);
 
-        Task UpdateLogDetail(LogDetail logDetail, byte statusId, string errorMessage);
+    Task UpdateLogDetail(LogDetail logDetail, byte statusId, string errorMessage);
+}
+
+public class SyncDataServiceImp : SyncDataService
+{
+    private readonly IDynamicRepository repository;
+
+    public SyncDataServiceImp(IDynamicRepository repository)
+    {
+        this.repository = repository;
     }
 
-    public class SyncDataServiceImp : SyncDataService
+    public async Task UpdateLogDetail(LogDetail logDetail, byte statusId, string errorMessage)
     {
-        private readonly IDynamicRepository repository;
-
-        public SyncDataServiceImp(IDynamicRepository repository)
+        var criteria = new UpdateLogCriteria
         {
-            this.repository = repository;
-        }
+            LogId = logDetail.LogId,
+            StatusId = statusId,
+            ErrMsg = errorMessage,
+            DbServer = logDetail.DbServer
+        };
 
-        public async Task UpdateLogDetail(LogDetail logDetail, byte statusId, string errorMessage)
+        await repository.ExecuteAsync(criteria);
+    }
+
+    public async Task<Result> SyncData(LogDetail logDetail)
+    {
+        var criteria = new SyncDataCriteria
         {
-            var criteria = new UpdateLogCriteria
-            {
-                LogId = logDetail.LogId,
-                StatusId = statusId,
-                ErrMsg = errorMessage,
-                DbServer = logDetail.DbServer
-            };
+            TransInfo = logDetail.TransInfo,
+            TableName = logDetail.TableName,
+            MatchId = logDetail.MatchId,
+            Action = logDetail.Action,
+            SettlementAction = logDetail.SettlementAction,
+            TicketType = logDetail.TicketType
+        };
 
-            await repository.ExecuteAsync(criteria);
-        }
+        await repository.ExecuteAsync(criteria);
 
-        public async Task<Result> SyncData(LogDetail logDetail)
+        return new Result
         {
-            var criteria = new SyncDataCriteria
-            {
-                TransInfo = logDetail.TransInfo,
-                TableName = logDetail.TableName,
-                MatchId = logDetail.MatchId,
-                Action = logDetail.Action,
-                SettlementAction = logDetail.SettlementAction,
-                TicketType = logDetail.TicketType
-            };
-
-            await repository.ExecuteAsync(criteria);
-
-            return new Result
-            {
-                ErrCode = criteria.ErrCode,
-                ErrMsg = criteria.ErrMsg
-            };
-        }
+            ErrCode = criteria.ErrCode,
+            ErrMsg = criteria.ErrMsg
+        };
     }
 }

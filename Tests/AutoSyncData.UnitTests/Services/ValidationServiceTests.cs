@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using AutoSyncData.Criteria;
+﻿using AutoSyncData.Criteria;
 using AutoSyncData.Models;
 using AutoSyncData.Services;
 using Fanex.Data.Repository;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace AutoSyncData.UnitTests.Services
@@ -17,6 +12,7 @@ namespace AutoSyncData.UnitTests.Services
     public class ValidationServiceTests
     {
         private readonly IOptions<AppSettingsKey> appSettingsKey;
+
         public ValidationServiceTests()
         {
             var settings = new AppSettingsKey()
@@ -34,10 +30,11 @@ namespace AutoSyncData.UnitTests.Services
             // Arrange
             var logDetail = new LogDetail();
             var repository = Substitute.For<IDynamicRepository>();
-            await repository.ExecuteAsync(Arg.Do<ValidateTicketsCriteria>(x =>{
+            await repository.ExecuteAsync(Arg.Do<ValidateTicketsCriteria>(x =>
+            {
                 x.IsPassed = true;
             }));
-            
+
             var service = new ValidationServiceImp(repository, appSettingsKey);
 
             // Act
@@ -53,7 +50,8 @@ namespace AutoSyncData.UnitTests.Services
             // Arrange
             var logDetail = new LogDetail();
             var repository = Substitute.For<IDynamicRepository>();
-            await repository.ExecuteAsync(Arg.Do<ValidateTicketsCriteria>(x => {
+            await repository.ExecuteAsync(Arg.Do<ValidateTicketsCriteria>(x =>
+            {
                 x.IsPassed = false;
             }));
 

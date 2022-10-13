@@ -1,35 +1,33 @@
 ﻿using AutoSyncData.Criteria;
 using AutoSyncData.Models;
 using Fanex.Data.Repository;
-using System.Threading.Tasks;
 
-namespace AutoSyncData.Services
+namespace AutoSyncData.Services;
+
+public interface LogDetailService
 {
-    public interface LogDetailService
+    Task<LogDetail> GetLatestLog(string server);
+}
+
+public class LogDetailServiceImp : LogDetailService
+{
+    private readonly IDynamicRepository repository;
+
+    public LogDetailServiceImp(IDynamicRepository repository)
     {
-        Task<LogDetail> GetLatestLog(string server);
+        this.repository = repository;
     }
 
-    public class LogDetailServiceImp : LogDetailService
+    public async Task<LogDetail> GetLatestLog(string server)
     {
-        private readonly IDynamicRepository repository;
-
-        public LogDetailServiceImp(IDynamicRepository repository)
+        var getLogCriteria = new GetLastestLogCriteria
         {
-            this.repository = repository;
-        }
+            DbServer = server
+        };
 
-        public async Task<LogDetail> GetLatestLog(string server)
-        {
-            var getLogCriteria = new GetLastestLogCriteria
-            {
-                DbServer = server
-            };
+        var latestLog = await repository.GetAsync<LogDetail>(getLogCriteria) ?? new LogDetail();
+        latestLog.DbServer = server;
 
-            var latestLog = await repository.GetAsync<LogDetail>(getLogCriteria) ?? new LogDetail();
-            latestLog.DbServer = server;
-
-            return latestLog;
-        }
+        return latestLog;
     }
 }

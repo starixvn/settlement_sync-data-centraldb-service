@@ -1,35 +1,33 @@
 ﻿using AutoSyncData.Models;
 using Microsoft.Extensions.Options;
-using System.Threading.Tasks;
 
-namespace AutoSyncData.Services
+namespace AutoSyncData.Services;
+
+public interface AutoSyncDataController
 {
-    public interface AutoSyncDataController
+    void ProcessAsync();
+}
+
+public class AutoSyncDataControllerImp : AutoSyncDataController
+{
+    private readonly SyncDataController syncDataController;
+
+    private readonly AppSettingsKey appSettingsKey;
+
+    public AutoSyncDataControllerImp(SyncDataController syncDataController, IOptions<AppSettingsKey> appSettingsKey)
     {
-        void ProcessAsync();
+        this.syncDataController = syncDataController;
+        this.appSettingsKey = appSettingsKey.Value;
     }
 
-    public class AutoSyncDataControllerImp : AutoSyncDataController
+    public void ProcessAsync()
     {
-        private readonly SyncDataController syncDataController;
+        var servers = appSettingsKey.SiteDbServer;
 
-        private readonly AppSettingsKey appSettingsKey;
-
-        public AutoSyncDataControllerImp(SyncDataController syncDataController, IOptions<AppSettingsKey> appSettingsKey)
+        servers.ForEach(server =>
         {
-            this.syncDataController = syncDataController;
-            this.appSettingsKey = appSettingsKey.Value;
-        }
-
-        public void ProcessAsync()
-        {
-            var servers = appSettingsKey.SiteDbServer;
-
-            servers.ForEach(server =>
-            {
-                Task.Run(() => syncDataController.Process(server))
-                    .ConfigureAwait(false);
-            });
-        }
+            Task.Run(() => syncDataController.Process(server))
+                .ConfigureAwait(false);
+        });
     }
 }

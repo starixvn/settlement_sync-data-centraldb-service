@@ -3,37 +3,35 @@ using Fanex.MailDeliver.Model;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
-namespace AutoSyncData.Services
+namespace AutoSyncData.Services;
+
+public interface SendMailService
 {
-    public interface SendMailService
+    void SendMail(LogDetail logDetail, string message);
+}
+
+public class SendMailServiceImp : SendMailService
+{
+    private readonly AppSettingsKey appSettingsKey;
+
+    public SendMailServiceImp(IOptions<AppSettingsKey> appSettingsKey)
     {
-        void SendMail(LogDetail logDetail, string message);
+        this.appSettingsKey = appSettingsKey.Value;
     }
 
-    public class SendMailServiceImp : SendMailService
+    public void SendMail(LogDetail logDetail, string message)
     {
-
-        private readonly AppSettingsKey appSettingsKey;
-
-        public SendMailServiceImp(IOptions<AppSettingsKey> appSettingsKey)
+        var content = JsonConvert.SerializeObject(logDetail);
+        var mailRecord = new MailRecord
         {
-            this.appSettingsKey = appSettingsKey.Value;
-        }
+            MailTo = appSettingsKey.EmailGroup,
+            Title = "NAP - Sync Data To Central DBTrans",
+            Subject = $"[{appSettingsKey.EnvironmentName}] - Sync Data issue - Log Id No. {logDetail.LogId}",
+            Body = $"{message} {content}"
+        };
 
-        public void SendMail(LogDetail logDetail, string message)
-        {
-            var content = JsonConvert.SerializeObject(logDetail);
-            var mailRecord = new MailRecord
-            {
-                MailTo = appSettingsKey.EmailGroup,
-                Title = "NAP - Sync Data To Central DBTrans",
-                Subject = $"[{appSettingsKey.EnvironmentName}] - Sync Data issue - Log Id No. {logDetail.LogId}",
-                Body = $"{message} {content}"
-            };
+        using var mailClient = new Fanex.MailDeliver.MailClient.API.MailDeliver();
 
-            using var mailClient = new Fanex.MailDeliver.MailClient.API.MailDeliver();
-
-            mailClient.SendMail(mailRecord);
-        }
+        mailClient.SendMail(mailRecord);
     }
 }
