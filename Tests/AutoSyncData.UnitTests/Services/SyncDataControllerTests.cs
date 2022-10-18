@@ -17,6 +17,7 @@ public class SyncDataControllerTests
     private readonly SendMailService sendMailService;
 
     private readonly IMaintenanceService maintenanceService;
+    private readonly ControlSyncService controlSyncService;
 
     public SyncDataControllerTests()
     {
@@ -25,6 +26,7 @@ public class SyncDataControllerTests
         syncDataService = Substitute.For<SyncDataService>();
         sendMailService = Substitute.For<SendMailService>();
         maintenanceService = Substitute.For<IMaintenanceService>();
+        controlSyncService = Substitute.For<ControlSyncService>();
     }
 
     [Fact]
@@ -33,13 +35,14 @@ public class SyncDataControllerTests
         // Arrange
         const string server = "1";
         logDetailService.GetLatestLog(Arg.Any<string>()).Returns(new LogDetail());
-        var service = new SyncDataControllerImp(logDetailService, validationService, syncDataService, sendMailService, maintenanceService);
+        controlSyncService.IsStartService().Returns(false);
+        var service = new SyncDataControllerImp(logDetailService, validationService, syncDataService, sendMailService, maintenanceService, controlSyncService);
 
         // Act
 
         var stopWatch = new Stopwatch();
         stopWatch.Start();
-        service.Process(server);
+        await service.Process(server);
         stopWatch.Stop();
         var timeSpan = stopWatch.Elapsed;
         // Assert
@@ -47,79 +50,78 @@ public class SyncDataControllerTests
         Assert.True(totalDelayTime > 500);
     }
 
-    //[Fact]
-    //public async Task Process_ExistedLogDetailAndTicketInvalid_CallRightSomeMethods()
-    //{
-    //    // Arrange
-    //    const string server = "1";
-    //    var logDetail = new LogDetail
-    //    {
-    //        LogId = 1,
-    //        MatchId = 1
-    //    };
+    [Fact]
+    public async Task Process_ExistedLogDetailAndTicketInvalid_CallRightSomeMethods()
+    {
+        // Arrange
+        const string server = "1";
+        var logDetail = new LogDetail
+        {
+            LogId = 1,
+            MatchId = 1
+        };
 
-    //    logDetailService.GetLatestLog(Arg.Any<string>()).Returns(logDetail);
-    //    validationService.ValidateTickets(Arg.Any<LogDetail>()).Returns(false);
-    //    var service = new SyncDataControllerImp(logDetailService, validationService, syncDataService, sendMailService);
+        logDetailService.GetLatestLog(Arg.Any<string>()).Returns(logDetail);
+        validationService.ValidateTickets(Arg.Any<LogDetail>()).Returns(false);
+        controlSyncService.IsStartService().Returns(false);
+        var service = new SyncDataControllerImp(logDetailService, validationService, syncDataService, sendMailService, maintenanceService, controlSyncService);
+        // Act
+        await service.Process(server);
 
-    //    // Act
-    //    await service.Process(server);
+        // Assert
+        await syncDataService.Received(2).UpdateLogDetail(Arg.Any<LogDetail>(), Arg.Any<byte>(), Arg.Any<string>());
+        sendMailService.Received(1).SendMail(Arg.Any<LogDetail>(), Arg.Any<string>());
+    }
 
-    //    // Assert
-    //    await syncDataService.Received(2).UpdateLogDetail(Arg.Any<LogDetail>(), Arg.Any<byte>(), Arg.Any<string>());
-    //    sendMailService.Received(1).SendMail(Arg.Any<LogDetail>(), Arg.Any<string>());
-    //    logDetailService.Received(1).RemoveLog(Arg.Any<LogDetail>());
-    //}
+    [Fact]
+    public async Task Process_ExistedLogDetailAndTicketValidAndSyncFail_CallRightSomeMethods()
+    {
+        // Arrange
+        const string server = "1";
+        var logDetail = new LogDetail
+        {
+            LogId = 1,
+            MatchId = 1
+        };
 
-    //[Fact]
-    //public async Task Process_ExistedLogDetailAndTicketValidAndSyncFail_CallRightSomeMethods()
-    //{
-    //    // Arrange
-    //    const string server = "1";
-    //    var logDetail = new LogDetail
-    //    {
-    //        LogId = 1,
-    //        MatchId = 1
-    //    };
+        logDetailService.GetLatestLog(Arg.Any<string>()).Returns(logDetail);
+        validationService.ValidateTickets(Arg.Any<LogDetail>()).Returns(true);
+        syncDataService.SyncData(Arg.Any<LogDetail>()).Returns(new Result { ErrCode = 1, ErrMsg = "Message" });
 
-    //    logDetailService.GetLatestLog(Arg.Any<string>()).Returns(logDetail);
-    //    validationService.ValidateTickets(Arg.Any<LogDetail>()).Returns(true);
-    //    syncDataService.SyncData(Arg.Any<LogDetail>()).Returns(new Result { ErrCode = 1, ErrMsg = "Message" });
+        controlSyncService.IsStartService().Returns(false);
+        var service = new SyncDataControllerImp(logDetailService, validationService, syncDataService, sendMailService, maintenanceService, controlSyncService);
 
-    //    var service = new SyncDataControllerImp(logDetailService, validationService, syncDataService, sendMailService);
+        // Act
+        await service.Process(server);
 
-    //    // Act
-    //    await service.Process(server);
+        // Assert
+        await syncDataService.Received(3).UpdateLogDetail(Arg.Any<LogDetail>(), Arg.Any<byte>(), Arg.Any<string>());
+        sendMailService.Received(1).SendMail(Arg.Any<LogDetail>(), Arg.Any<string>());
+    }
 
-    //    // Assert
-    //    await syncDataService.Received(3).UpdateLogDetail(Arg.Any<LogDetail>(), Arg.Any<byte>(), Arg.Any<string>());
-    //    sendMailService.Received(1).SendMail(Arg.Any<LogDetail>(), Arg.Any<string>());
-    //    logDetailService.Received(1).RemoveLog(Arg.Any<LogDetail>());
-    //}
+    [Fact]
+    public async Task Process_ExistedLogDetailAndTicketValidAndSyncSuccess_CallRightSomeMethods()
+    {
+        // Arrange
+        const string server = "1";
+        var logDetail = new LogDetail
+        {
+            LogId = 1,
+            MatchId = 1
+        };
 
-    //[Fact]
-    //public async Task Process_ExistedLogDetailAndTicketValidAndSyncSuccess_CallRightSomeMethods()
-    //{
-    //    // Arrange
-    //    const string server = "1";
-    //    var logDetail = new LogDetail
-    //    {
-    //        LogId = 1,
-    //        MatchId = 1
-    //    };
+        logDetailService.GetLatestLog(Arg.Any<string>()).Returns(logDetail);
+        validationService.ValidateTickets(Arg.Any<LogDetail>()).Returns(true);
+        syncDataService.SyncData(Arg.Any<LogDetail>()).Returns(new Result { ErrCode = 0, ErrMsg = string.Empty });
 
-    //    logDetailService.GetLatestLog(Arg.Any<string>()).Returns(logDetail);
-    //    validationService.ValidateTickets(Arg.Any<LogDetail>()).Returns(true);
-    //    syncDataService.SyncData(Arg.Any<LogDetail>()).Returns(new Result { ErrCode = 0, ErrMsg = string.Empty });
 
-    //    var service = new SyncDataControllerImp(logDetailService, validationService, syncDataService, sendMailService);
+        controlSyncService.IsStartService().Returns(false);
+        var service = new SyncDataControllerImp(logDetailService, validationService, syncDataService, sendMailService, maintenanceService, controlSyncService);
+        // Act
+        await service.Process(server);
 
-    //    // Act
-    //    await service.Process(server);
-
-    //    // Assert
-    //    await syncDataService.Received(3).UpdateLogDetail(Arg.Any<LogDetail>(), Arg.Any<byte>(), Arg.Any<string>());
-    //    sendMailService.DidNotReceive().SendMail(Arg.Any<LogDetail>(), Arg.Any<string>());
-    //    logDetailService.Received(1).RemoveLog(Arg.Any<LogDetail>());
-    //}
+        // Assert
+        await syncDataService.Received(3).UpdateLogDetail(Arg.Any<LogDetail>(), Arg.Any<byte>(), Arg.Any<string>());
+        sendMailService.DidNotReceive().SendMail(Arg.Any<LogDetail>(), Arg.Any<string>());
+    }
 }

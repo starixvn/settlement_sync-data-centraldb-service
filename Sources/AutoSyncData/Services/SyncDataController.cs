@@ -59,7 +59,8 @@ public class SyncDataControllerImp : SyncDataController
             }
             else
             {
-                await Task.Delay(500);
+                const int timeDelay = 500;
+                await Task.Delay(timeDelay);
             }
 
             isStart = await controlSyncService.IsStartService();
