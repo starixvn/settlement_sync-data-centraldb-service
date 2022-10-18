@@ -39,8 +39,7 @@ public class SyncDataControllerImp : SyncDataController
 
     public async Task Process(string server)
     {
-        var isStart = true;
-        while (isStart)
+        while (await controlSyncService.IsStartService())
         {
             var logDetail = await logDetailService.GetLatestLog(server);
 
@@ -62,8 +61,6 @@ public class SyncDataControllerImp : SyncDataController
                 const int timeDelay = 500;
                 await Task.Delay(timeDelay);
             }
-
-            isStart = await controlSyncService.IsStartService();
         }
     }
 
