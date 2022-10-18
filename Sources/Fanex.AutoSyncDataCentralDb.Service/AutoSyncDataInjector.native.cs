@@ -23,6 +23,7 @@ public static class AutoSyncDataInjector
         service.AddSingleton<SyncDataService, SyncDataServiceImp>();
         service.AddSingleton<ValidationService, ValidationServiceImp>();
         service.AddTransient<IMaintenanceService, MaintenanceServiceImp>();
+        service.AddSingleton<ControlSyncService, ControlSyncServiceImp>();
         service.AddSingleton(new UMClientConfiguration().Initialize(configuration));
         service.AddSingleton<IUMCacheService, UMCacheService>();
         service.AddSingleton<IUMRestClient, UMRestClient>();

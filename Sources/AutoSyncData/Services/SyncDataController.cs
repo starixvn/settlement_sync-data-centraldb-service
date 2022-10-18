@@ -1,6 +1,5 @@
 ﻿using AutoSyncData.Constants;
 using AutoSyncData.Models;
-using Fanex.Caching;
 
 namespace AutoSyncData.Services;
 
@@ -21,23 +20,21 @@ public class SyncDataControllerImp : SyncDataController
 
     private readonly IMaintenanceService maintenanceService;
 
-    private readonly ICache cache;
-
-    private const string AutoSyncKey = "Settlement-Auto-Sync-Sportsbook";
+    private readonly ControlSyncService controlSyncService;
 
     public SyncDataControllerImp(LogDetailService logDetailService,
         ValidationService validationService,
         SyncDataService syncDataService,
         SendMailService sendMailService,
-        ICache cache,
-        IMaintenanceService maintenanceService)
+        IMaintenanceService maintenanceService,
+        ControlSyncService controlSyncService)
     {
         this.logDetailService = logDetailService;
         this.validationService = validationService;
         this.syncDataService = syncDataService;
         this.sendMailService = sendMailService;
-        this.cache = cache;
         this.maintenanceService = maintenanceService;
+        this.controlSyncService = controlSyncService;
     }
 
     public async Task Process(string server)
@@ -65,26 +62,7 @@ public class SyncDataControllerImp : SyncDataController
                 await Task.Delay(500);
             }
 
-            isStart = await IsStartService();
-        }
-    }
-
-    private async Task<bool> IsStartService()
-    {
-        try
-        {
-            var isExistedKey = await cache.ContainAsync(AutoSyncKey);
-            if (isExistedKey)
-            {
-                var (_, value) = await cache.TryGetAsync<bool>(AutoSyncKey);
-                return value;
-            }
-
-            return true;
-        }
-        catch
-        {
-            return true;
+            isStart = await controlSyncService.IsStartService();
         }
     }
 
