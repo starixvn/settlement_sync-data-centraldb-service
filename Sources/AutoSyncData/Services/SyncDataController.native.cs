@@ -7,9 +7,8 @@ public interface SyncDataController
 
 public class SyncDataControllerImp : SyncDataController
 {
-
     private readonly SyncDataHandler syncDataHandler;
-    private const int TimeDeplayCheckStartService = 3000;
+    private const int TimeDelayCheckStartService = 3000;
 
     public SyncDataControllerImp(SyncDataHandler syncDataHandler)
     {
@@ -18,20 +17,17 @@ public class SyncDataControllerImp : SyncDataController
 
     public async Task Process(string server)
     {
-
         while (true)
         {
             var isStart = await syncDataHandler.IsStartService();
 
             if (!isStart)
             {
-                await Task.Delay(TimeDeplayCheckStartService);
+                await Task.Delay(TimeDelayCheckStartService);
                 continue;
             }
 
             await syncDataHandler.Handle(server);
         }
     }
-
-
 }

@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Services\MaintenanceService.native.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Fanex.Caching" Version="2.2.3" />
     <PackageReference Include="Fanex.Caching.Redis.AspNetCore" Version="2.2.3" />
     <PackageReference Include="Fanex.Data.Repository" Version="4.2.2" />

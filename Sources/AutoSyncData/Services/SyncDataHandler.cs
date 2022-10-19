@@ -14,14 +14,13 @@ namespace AutoSyncData.Services
     public class SyncDataHandlerImp : SyncDataHandler
     {
         private const string AutoSyncKey = "Settlement-Auto-Sync-Sportsbook";
-        private const int TimeDeplayGetLog = 500;
+        private const int TimeDelayGetLog = 500;
 
         private readonly ICache cache;
         private readonly LogDetailService logDetailService;
         private readonly ValidationService validationService;
         private readonly SyncDataService syncDataService;
         private readonly SendMailService sendMailService;
-
 
         public SyncDataHandlerImp(
             ICache cache,
@@ -36,7 +35,6 @@ namespace AutoSyncData.Services
             this.syncDataService = syncDataService;
             this.sendMailService = sendMailService;
         }
-
 
         public async Task<bool> IsStartService()
         {
@@ -63,7 +61,7 @@ namespace AutoSyncData.Services
 
             if (logDetail.LogId <= 0)
             {
-                await Task.Delay(TimeDeplayGetLog);
+                await Task.Delay(TimeDelayGetLog);
                 return;
             }
 
