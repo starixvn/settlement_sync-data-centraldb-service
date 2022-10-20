@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Functions>
   <Function Name="AutoSyncData">
-    <Setting Key="NAP_SettlementService_Validation" SpName="NAP_SettlementService_Validation" DbName="DBTXN.bodb02.bodbAdminNet" />
-    <Setting Key="NAP_SettlementService_Calculation" SpName="NAP_SettlementService_Calculation" DbName="DBTXN.bodb02.bodbAdminNet" />
+    <Setting Key="NAP_SettlementService_Validation" SpName="NAP_SettlementService_Validation" DbName="DBTXN.bodb02.bodbAdminNet" TimeOut="60" />
+    <Setting Key="NAP_SettlementService_Calculation" SpName="NAP_SettlementService_Calculation" DbName="DBTXN.bodb02.bodbAdminNet" TimeOut="300" />
   </Function>
   <Function Name="SiteDb">
     <Setting Key="SiteDB_NAP_SettlementService_CalculationLogSel_DBSID01" SpName="SiteDB_NAP_SettlementService_CalculationLogSel" DbName="DBSID01.bodb02.bodbAdminNet" />
