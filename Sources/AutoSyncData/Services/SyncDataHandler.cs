@@ -1,6 +1,7 @@
 ﻿using AutoSyncData.Constants;
 using AutoSyncData.Models;
 using Fanex.Caching;
+using Fanex.Logging;
 
 namespace AutoSyncData.Services
 {
@@ -57,24 +58,31 @@ namespace AutoSyncData.Services
 
         public async Task Handle(string server)
         {
-            var logDetail = await logDetailService.GetLatestLog(server);
-
-            if (logDetail.LogId <= 0)
+            try
             {
-                await Task.Delay(TimeDelayGetLog);
-                return;
+                var logDetail = await logDetailService.GetLatestLog(server);
+
+                if (logDetail.LogId <= 0)
+                {
+                    await Task.Delay(TimeDelayGetLog);
+                    return;
+                }
+
+                await syncDataService.UpdateLogDetail(logDetail, StatusId.Waiting, string.Empty);
+
+                var isTicketsValid = await validationService.ValidateTickets(logDetail);
+                if (isTicketsValid)
+                {
+                    await SyncTicketToCentral(logDetail);
+                }
+                else
+                {
+                    await UpdateLogDetailAndSendMail(logDetail, "Failed in validation ticket count");
+                }
             }
-
-            await syncDataService.UpdateLogDetail(logDetail, StatusId.Waiting, string.Empty);
-
-            var isTicketsValid = await validationService.ValidateTickets(logDetail);
-            if (isTicketsValid)
+            catch (Exception exception)
             {
-                await SyncTicketToCentral(logDetail);
-            }
-            else
-            {
-                await UpdateLogDetailAndSendMail(logDetail, "Failed in validation ticket count");
+                await LogService.ErrorAsync($"AutoSyncDataCentralDb - Server:{server} - Exception in main thread - Process:{exception}");
             }
         }
 
