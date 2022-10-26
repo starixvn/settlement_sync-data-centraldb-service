@@ -2,55 +2,53 @@
 using AutoSyncData.Models;
 using Fanex.Data.Repository;
 using Microsoft.Extensions.Options;
-using System.Threading.Tasks;
 
-namespace AutoSyncData.Services
+namespace AutoSyncData.Services;
+
+public interface ValidationService
 {
-    public interface ValidationService
+    Task<bool> ValidateTickets(LogDetail logDetail);
+}
+
+public class ValidationServiceImp : ValidationService
+{
+    private readonly IDynamicRepository repository;
+
+    private readonly AppSettingsKey appSettingsKey;
+
+    public ValidationServiceImp(IDynamicRepository repository, IOptions<AppSettingsKey> appSettingsKey)
     {
-        Task<bool> ValidateTickets(LogDetail logDetail);
+        this.repository = repository;
+        this.appSettingsKey = appSettingsKey.Value;
     }
 
-    public class ValidationServiceImp : ValidationService
+    public async Task<bool> ValidateTickets(LogDetail logDetail)
     {
-        private readonly IDynamicRepository repository;
-
-        private readonly AppSettingsKey appSettingsKey;
-
-        public ValidationServiceImp(IDynamicRepository repository, IOptions<AppSettingsKey> appSettingsKey)
+        var criteria = new ValidateTicketsCriteria
         {
-            this.repository = repository;
-            this.appSettingsKey = appSettingsKey.Value;
-        }
+            TransInfo = logDetail.TransInfo,
+            TableName = logDetail.TableName,
+        };
 
-        public async Task<bool> ValidateTickets(LogDetail logDetail)
+        return await TryValidateTickets(criteria);
+    }
+
+    private async Task<bool> TryValidateTickets(ValidateTicketsCriteria criteria)
+    {
+        for (var i = 0; i < appSettingsKey.RetryCount; i++)
         {
-            var criteria = new ValidateTicketsCriteria
+            await repository.ExecuteAsync(criteria);
+            if (criteria.IsPassed)
             {
-                TransInfo = logDetail.TransInfo,
-                TableName = logDetail.TableName,
-            };
-
-            return await TryValidateTickets(criteria);
-        }
-
-        private async Task<bool> TryValidateTickets(ValidateTicketsCriteria criteria)
-        {
-            for (var i = 0; i < appSettingsKey.RetryCount; i++)
-            {
-                await repository.ExecuteAsync(criteria);
-                if (criteria.IsPassed)
-                {
-                    return true;
-                }
-
-                if (i < appSettingsKey.RetryCount - 1)
-                {
-                    await Task.Delay(appSettingsKey.RetryInterval);
-                }
+                return true;
             }
 
-            return false;
+            if (i < appSettingsKey.RetryCount - 1)
+            {
+                await Task.Delay(appSettingsKey.RetryInterval);
+            }
         }
+
+        return false;
     }
 }
