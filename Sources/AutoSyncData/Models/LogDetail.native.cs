@@ -5,6 +5,7 @@ public class LogDetail
     public int LogId { get; set; }
 
     public string TransInfo { get; set; }
+    public string TransInfoJson { get; set; }
 
     public string TableName { get; set; }
 
