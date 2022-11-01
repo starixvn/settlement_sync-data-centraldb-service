@@ -1,57 +1,53 @@
-﻿using AutoSyncData.Criteria;
+﻿using AutoSyncData.Constants;
+using AutoSyncData.Criteria;
 using AutoSyncData.Models;
 using Fanex.Data.Repository;
+using Fanex.Settlement.ScaleOut.Services;
+using System.Data;
 
 namespace AutoSyncData.Services;
 
 public interface SyncDataService
 {
-    Task<Result> SyncData(LogDetail logDetail);
+    Task UpdateLogStatus(MinMaxLog log, string server);
 
-    Task UpdateLogDetail(LogDetail logDetail, byte statusId, string errorMessage);
+    Task InsertLog(DataTable table, int siteDbGroupId);
 }
 
 public class SyncDataServiceImp : SyncDataService
 {
     private readonly IDynamicRepository repository;
 
-    public SyncDataServiceImp(IDynamicRepository repository)
+    private readonly ScaleOutSettleService scaleOutSettleService;
+
+    public SyncDataServiceImp(IDynamicRepository repository, ScaleOutSettleService scaleOutSettleService)
     {
         this.repository = repository;
+        this.scaleOutSettleService = scaleOutSettleService;
     }
 
-    public async Task UpdateLogDetail(LogDetail logDetail, byte statusId, string errorMessage)
+    public async Task UpdateLogStatus(MinMaxLog log, string server)
     {
         var criteria = new UpdateLogCriteria
         {
-            LogId = logDetail.LogId,
-            StatusId = statusId,
-            ErrMsg = errorMessage,
-            DbServer = logDetail.DbServer
+            SessionId = log.SessionId,
+            MinLogId = log.MinLogId,
+            MaxLogId = log.MaxLogId,
+            DbServer = server,
+            StatusId = StatusId.Completed
         };
 
         await repository.ExecuteAsync(criteria);
     }
 
-    public async Task<Result> SyncData(LogDetail logDetail)
+    public async Task InsertLog(DataTable table, int siteDbGroupId)
     {
-        var criteria = new SyncDataCriteria
+        var criteria = new InsertLogCriteria
         {
-            TransInfo = logDetail.TransInfo,
-            TransInfoJson = logDetail.TransInfoJson,
-            TableName = logDetail.TableName,
-            MatchId = logDetail.MatchId,
-            Action = logDetail.Action,
-            SettlementAction = logDetail.SettlementAction,
-            TicketType = logDetail.TicketType
+            SiteDBGroupId = siteDbGroupId,
+            SiteDBCalculationLog = table
         };
 
         await repository.ExecuteAsync(criteria);
-
-        return new Result
-        {
-            ErrCode = criteria.ErrCode,
-            ErrMsg = criteria.ErrMsg
-        };
     }
 }

@@ -1,6 +1,4 @@
-﻿using AutoSyncData.Constants;
-using AutoSyncData.Models;
-using Fanex.Caching;
+﻿using Fanex.Caching;
 using Fanex.Logging;
 
 namespace AutoSyncData.Services
@@ -9,32 +7,25 @@ namespace AutoSyncData.Services
     {
         Task<bool> IsStartService();
 
-        Task Handle(string server);
+        Task Handle(string server, int siteDbGroupId);
     }
 
     public class SyncDataHandlerImp : SyncDataHandler
     {
         private const string AutoSyncKey = "Settlement-Auto-Sync-Sportsbook";
-        private const int TimeDelayGetLog = 500;
 
         private readonly ICache cache;
         private readonly LogDetailService logDetailService;
-        private readonly ValidationService validationService;
         private readonly SyncDataService syncDataService;
-        private readonly SendMailService sendMailService;
 
         public SyncDataHandlerImp(
             ICache cache,
             LogDetailService logDetailService,
-            ValidationService validationService,
-            SyncDataService syncDataService,
-            SendMailService sendMailService)
+            SyncDataService syncDataService)
         {
             this.cache = cache;
             this.logDetailService = logDetailService;
-            this.validationService = validationService;
             this.syncDataService = syncDataService;
-            this.sendMailService = sendMailService;
         }
 
         public async Task<bool> IsStartService()
@@ -56,55 +47,35 @@ namespace AutoSyncData.Services
             }
         }
 
-        public async Task Handle(string server)
+        public async Task Handle(string server, int siteDbGroupId)
         {
             try
             {
-                var logDetail = await logDetailService.GetLatestLog(server);
+                var batchSize = 10;
+                var watch = System.Diagnostics.Stopwatch.StartNew();
+                //var list = await logDetailService.GetCalculationLogList(server, batchSize);
+                var tableCommand = await logDetailService.GetCalculationLog(server, batchSize);
+                watch.Stop();
 
-                if (logDetail.LogId <= 0)
-                {
-                    await Task.Delay(TimeDelayGetLog);
-                    return;
-                }
+                var watch1 = System.Diagnostics.Stopwatch.StartNew();
+                await syncDataService.InsertLog(tableCommand, siteDbGroupId);
+                watch1.Stop();
 
-                await syncDataService.UpdateLogDetail(logDetail, StatusId.Waiting, string.Empty);
+                //var watch1 = System.Diagnostics.Stopwatch.StartNew();
+                //var list = await logDetailService.GetCalculationLogList(server, batchSize);
+                //watch1.Stop();
 
-                var isTicketsValid = await validationService.ValidateTickets(logDetail);
-                if (isTicketsValid)
-                {
-                    await SyncTicketToCentral(logDetail);
-                }
-                else
-                {
-                    await UpdateLogDetailAndSendMail(logDetail, "Failed in validation ticket count");
-                }
+                //var minMaxLog = logDetailService.GetMinMaxLogId(tableCommand);
+                //await syncDataService.UpdateLogStatus(minMaxLog, server);
+
+                var log = $"TALBE\t{batchSize}\t{watch.ElapsedMilliseconds}\t{watch1.ElapsedMilliseconds}\r\n";
+                Console.WriteLine(log);
+                await File.AppendAllTextAsync("log.csv", log);
             }
             catch (Exception exception)
             {
                 await LogService.ErrorAsync($"AutoSyncDataCentralDb - Server:{server} - Exception in main thread - Process:{exception}");
             }
-        }
-
-        private async Task SyncTicketToCentral(LogDetail logDetail)
-        {
-            await syncDataService.UpdateLogDetail(logDetail, StatusId.Running, string.Empty);
-            var result = await syncDataService.SyncData(logDetail);
-
-            if (result.ErrCode == 0)
-            {
-                await syncDataService.UpdateLogDetail(logDetail, StatusId.Completed, string.Empty);
-            }
-            else
-            {
-                await UpdateLogDetailAndSendMail(logDetail, $"Failed to sync data: {result.ErrMsg}");
-            }
-        }
-
-        private async Task UpdateLogDetailAndSendMail(LogDetail logDetail, string message)
-        {
-            await syncDataService.UpdateLogDetail(logDetail, StatusId.Failed, message);
-            sendMailService.SendMail(logDetail, message);
         }
     }
 }

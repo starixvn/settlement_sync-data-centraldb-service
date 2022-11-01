@@ -7,9 +7,9 @@ public class LogDetail
     public string TransInfo { get; set; }
     public string TransInfoJson { get; set; }
 
-    public string TableName { get; set; }
+    public string TransInfoJson { get; set; }
 
-    public string DbServer { get; set; }
+    public string TableName { get; set; }
 
     public int MatchId { get; set; }
 
@@ -18,4 +18,8 @@ public class LogDetail
     public string SettlementAction { get; set; }
 
     public string TicketType { get; set; }
+
+    public int SessionId { get; set; }
+
+    public bool IsParallel { get; set; }
 }

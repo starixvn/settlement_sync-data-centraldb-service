@@ -8,6 +8,8 @@ public class GetLastestLogCriteria : CriteriaBase
     [SpParam(Ignored = true)]
     public string DbServer { get; set; }
 
+    public int Batch { get; set; }
+
     public override string GetSettingKey()
     {
         return $"SiteDB_NAP_SettlementService_CalculationLogSel_{DbServer}";

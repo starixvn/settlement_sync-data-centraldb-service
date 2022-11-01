@@ -1,15 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Functions>
   <Function Name="AutoSyncData">
-    <Setting Key="NAP_SettlementService_Validation" SpName="NAP_SettlementService_Validation" DbName="DBTXN.bodb02.bodbAdminNet" TimeOut="60" />
-    <Setting Key="NAP_SettlementService_Calculation" SpName="NAP_SettlementService_Calculation" DbName="DBTXN.bodb02.bodbAdminNet" TimeOut="300" />
+    <Setting Key="NAP_SettlementService_CalculationLogIns" SpName="NAP_SettlementService_CalculationLogIns_xtest" DbName="DBTXN.bodb02.bodbAdminNet" TimeOut="60" />
   </Function>
 
   <Function Name="SiteDb">
-    <Setting Key="SiteDB_NAP_SettlementService_CalculationLogSel_DBSID01" SpName="SiteDB_NAP_SettlementService_CalculationLogSel" DbName="DBSID01.bodb02.bodbAdminNet" />
-    <Setting Key="SiteDB_NAP_SettlementService_CalculationLogSel_DBSID02" SpName="SiteDB_NAP_SettlementService_CalculationLogSel" DbName="DBSID02.bodb02.bodbAdminNet" />
+    <Function Name="Get_SiteDBGroupID">
+      <Setting Key="Get_SiteDBGroupID_DBSID01" SpName="Get_SiteDBGroupID" DbName="DBSID01.bodb02.bodbAdminNet" />
+      <Setting Key="Get_SiteDBGroupID_DBSID02" SpName="Get_SiteDBGroupID" DbName="DBSID02.bodb02.bodbAdminNet" />
+    </Function>
 
-    <Setting Key="SiteDB_NAP_SettlementService_CalculationLogUpd_DBSID01" SpName="SiteDB_NAP_SettlementService_CalculationLogUpd" DbName="DBSID01.bodb02.bodbAdminNet" TimeOut="60" />
-    <Setting Key="SiteDB_NAP_SettlementService_CalculationLogUpd_DBSID02" SpName="SiteDB_NAP_SettlementService_CalculationLogUpd" DbName="DBSID02.bodb02.bodbAdminNet" TimeOut="60" />
+    <Function Name="SiteDB_NAP_SettlementService_CalculationLogSel">
+      <Setting Key="SiteDB_NAP_SettlementService_CalculationLogSel_DBSID01" SpName="SiteDB_NAP_SettlementService_CalculationLogSel_xtest" DbName="DBSID01.bodb02.bodbAdminNet" />
+      <Setting Key="SiteDB_NAP_SettlementService_CalculationLogSel_DBSID02" SpName="SiteDB_NAP_SettlementService_CalculationLogSel_xtest" DbName="DBSID02.bodb02.bodbAdminNet" />
+    </Function>
+
+    <Function Name="SiteDB_NAP_SettlementService_CalculationLogUpd">
+      <Setting Key="SiteDB_NAP_SettlementService_CalculationLogUpd_DBSID01" SpName="SiteDB_NAP_SettlementService_CalculationLogUpd_xtest" DbName="DBSID01.bodb02.bodbAdminNet" TimeOut="60" />
+      <Setting Key="SiteDB_NAP_SettlementService_CalculationLogUpd_DBSID02" SpName="SiteDB_NAP_SettlementService_CalculationLogUpd_xtest" DbName="DBSID02.bodb02.bodbAdminNet" TimeOut="60" />
+    </Function>
   </Function>
 </Functions>

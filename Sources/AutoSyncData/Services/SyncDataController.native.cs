@@ -2,7 +2,7 @@
 
 public interface SyncDataController
 {
-    Task Process(string server);
+    Task Process(string server, int siteDbGroupId);
 }
 
 public class SyncDataControllerImp : SyncDataController
@@ -15,7 +15,7 @@ public class SyncDataControllerImp : SyncDataController
         this.syncDataHandler = syncDataHandler;
     }
 
-    public async Task Process(string server)
+    public async Task Process(string server, int siteDbGroupId)
     {
         while (true)
         {
@@ -27,7 +27,7 @@ public class SyncDataControllerImp : SyncDataController
                 continue;
             }
 
-            await syncDataHandler.Handle(server);
+            await syncDataHandler.Handle(server, siteDbGroupId);
         }
     }
 }
