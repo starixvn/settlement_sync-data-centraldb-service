@@ -6,6 +6,8 @@ public class SyncDataCriteria : NonQueryCommand
 {
     public string TransInfo { get; set; }
 
+    public string TransInfoJson { get; set; }
+
     public string TableName { get; set; }
 
     public int MatchId { get; set; }

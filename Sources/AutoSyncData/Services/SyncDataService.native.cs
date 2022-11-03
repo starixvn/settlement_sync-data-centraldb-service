@@ -38,6 +38,7 @@ public class SyncDataServiceImp : SyncDataService
         var criteria = new SyncDataCriteria
         {
             TransInfo = logDetail.TransInfo,
+            TransInfoJson = logDetail.TransInfoJson,
             TableName = logDetail.TableName,
             MatchId = logDetail.MatchId,
             Action = logDetail.Action,
