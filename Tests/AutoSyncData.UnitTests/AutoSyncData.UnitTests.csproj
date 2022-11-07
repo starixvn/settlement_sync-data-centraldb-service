@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Services\SyncDataHandlerTests.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="..\..\Sources\Fanex.AutoSyncDataCentralDb.Service\appsettings.json" Link="appsettings.json" />
   </ItemGroup>
 

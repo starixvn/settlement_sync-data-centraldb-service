@@ -3,16 +3,14 @@ using Fanex.Data.Repository;
 
 namespace AutoSyncData.Criteria;
 
-public class GetLastestLogCriteria : CriteriaBase
+public class GetLatestLogPendingCriteria : CriteriaBase
 {
     [SpParam(Ignored = true)]
     public string DbServer { get; set; }
 
-    public int Batch { get; set; }
-
     public override string GetSettingKey()
     {
-        return $"SiteDB_NAP_SettlementService_CalculationLogSel_{DbServer}";
+        return $"SiteDB_NAP_SettlementService_PendingLog_{DbServer}";
     }
 
     public override bool IsValid() => !string.IsNullOrWhiteSpace(DbServer);

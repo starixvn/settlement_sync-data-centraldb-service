@@ -15,8 +15,20 @@ public class SyncDataControllerImp : SyncDataController
         this.syncDataHandler = syncDataHandler;
     }
 
+    private async Task Start(string server, int siteDbGroupId)
+    {
+        var isStart = await syncDataHandler.IsStartService();
+
+        if (isStart)
+        {
+            await syncDataHandler.StartHandle(server, siteDbGroupId);
+        }
+    }
+
     public async Task Process(string server, int siteDbGroupId)
     {
+        await Start(server, siteDbGroupId);
+
         while (true)
         {
             var isStart = await syncDataHandler.IsStartService();
@@ -27,7 +39,7 @@ public class SyncDataControllerImp : SyncDataController
                 continue;
             }
 
-            await syncDataHandler.Handle(server, siteDbGroupId);
+            await syncDataHandler.ProcessHandle(server, siteDbGroupId);
         }
     }
 }

@@ -7,42 +7,39 @@ namespace AutoSyncData.UnitTests.Services
     public class LogDetailServiceTests
     {
         [Fact]
-        public void GetMinMaxLogId_EmptyData_ReturnMinMaxIsZero()
+        public void GetLogIds_EmptyData_ReturnsEmpty()
         {
             // Arrange
             var table = new DataTable();
-            var service = new LogDetailServiceImp();
+            var service = new QueryLogServiceImp();
 
             // Act
-            var result = service.GetMinMaxLogId(table);
+            var result = service.GetLogIds(table);
 
             // Assert
-            Assert.Equal(0, result.MinLogId);
-            Assert.Equal(0, result.MaxLogId);
+            Assert.Empty(result);
         }
 
         [Fact]
-        public void GetMinMaxLogId_FakeData_ReturnsRightMinMax()
+        public void GetLogIds_FakeData_ReturnsExpectedStringLogIds()
         {
             // Arrange
             var dt = new DataTable();
 
             dt.Columns.Add("LogId");
-            dt.Columns.Add("SessionId");
 
-            dt.Rows.Add(9, 1111);
-            dt.Rows.Add(5, 1111);
-            dt.Rows.Add(1, 1111);
+            dt.Rows.Add(9876);
+            dt.Rows.Add(51234);
+            dt.Rows.Add(16789);
 
-            var service = new LogDetailServiceImp();
+            var service = new QueryLogServiceImp();
 
             // Act
-            var result = service.GetMinMaxLogId(dt);
+            var result = service.GetLogIds(dt);
 
             // Assert
-            Assert.Equal(1, result.MinLogId);
-            Assert.Equal(9, result.MaxLogId);
-            Assert.Equal(1111, result.SessionId);
+            var expected = "9876,51234,16789";
+            Assert.Equal(expected, result);
         }
     }
 }

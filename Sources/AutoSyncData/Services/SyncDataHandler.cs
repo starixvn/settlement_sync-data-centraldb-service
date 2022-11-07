@@ -1,5 +1,6 @@
 ﻿using Fanex.Caching;
 using Fanex.Logging;
+using System.Data;
 
 namespace AutoSyncData.Services
 {
@@ -7,25 +8,37 @@ namespace AutoSyncData.Services
     {
         Task<bool> IsStartService();
 
-        Task Handle(string server, int siteDbGroupId);
+        Task StartHandle(string server, int siteDbGroupId);
+
+        Task ProcessHandle(string server, int siteDbGroupId);
     }
 
     public class SyncDataHandlerImp : SyncDataHandler
     {
         private const string AutoSyncKey = "Settlement-Auto-Sync-Sportsbook";
 
+        private const int TimeDelayGetLog = 500;
+
+        private const int BatchSize = 10;
+
         private readonly ICache cache;
-        private readonly LogDetailService logDetailService;
+
+        private readonly QueryLogService queryLogService;
+
         private readonly SyncDataService syncDataService;
+
+        private readonly SendMailService sendMailService;
 
         public SyncDataHandlerImp(
             ICache cache,
-            LogDetailService logDetailService,
-            SyncDataService syncDataService)
+            QueryLogService queryLogService,
+            SyncDataService syncDataService,
+            SendMailService sendMailService)
         {
             this.cache = cache;
-            this.logDetailService = logDetailService;
+            this.queryLogService = queryLogService;
             this.syncDataService = syncDataService;
+            this.sendMailService = sendMailService;
         }
 
         public async Task<bool> IsStartService()
@@ -47,34 +60,50 @@ namespace AutoSyncData.Services
             }
         }
 
-        public async Task Handle(string server, int siteDbGroupId)
+        public async Task StartHandle(string server, int siteDbGroupId)
         {
             try
             {
-                var batchSize = 10;
-                var watch = System.Diagnostics.Stopwatch.StartNew();
-                //var list = await logDetailService.GetCalculationLogList(server, batchSize);
-                var tableCommand = await logDetailService.GetCalculationLog(server, batchSize);
-                watch.Stop();
+                var isSync = await syncDataService.RetrySyncCommandTicketToCentral(server, siteDbGroupId);
 
-                var watch1 = System.Diagnostics.Stopwatch.StartNew();
-                await syncDataService.InsertLog(tableCommand, siteDbGroupId);
-                watch1.Stop();
-
-                //var watch1 = System.Diagnostics.Stopwatch.StartNew();
-                //var list = await logDetailService.GetCalculationLogList(server, batchSize);
-                //watch1.Stop();
-
-                //var minMaxLog = logDetailService.GetMinMaxLogId(tableCommand);
-                //await syncDataService.UpdateLogStatus(minMaxLog, server);
-
-                var log = $"TALBE\t{batchSize}\t{watch.ElapsedMilliseconds}\t{watch1.ElapsedMilliseconds}\r\n";
-                Console.WriteLine(log);
-                await File.AppendAllTextAsync("log.csv", log);
+                if (!isSync)
+                {
+                    sendMailService.SendMail($"SiteDbGroupId:{siteDbGroupId} - Pending log is still wrong when restarting service.");
+                }
             }
             catch (Exception exception)
             {
-                await LogService.ErrorAsync($"AutoSyncDataCentralDb - Server:{server} - Exception in main thread - Process:{exception}");
+                await LogService.ErrorAsync($"AutoSyncDataCentralDb - Server:{server} - Restarting service:{exception}");
+            }
+        }
+
+        public async Task ProcessHandle(string server, int siteDbGroupId)
+        {
+            try
+            {
+                var lastLog = await queryLogService.GetLatestLog(server, BatchSize);
+                if (lastLog.Rows.Count == 0)
+                {
+                    await Task.Delay(TimeDelayGetLog);
+                    return;
+                }
+
+                await SyncCommandTicketToCentral(lastLog, server, siteDbGroupId);
+            }
+            catch (Exception exception)
+            {
+                await LogService.ErrorAsync($"AutoSyncDataCentralDb - SiteDbGroupId:{siteDbGroupId} - Exception in main thread - Process:{exception}");
+            }
+        }
+
+        private async Task SyncCommandTicketToCentral(DataTable lastLog, string server, int siteDbGroupId)
+        {
+            var isSync = await syncDataService.SyncCommandTicketToCentral(lastLog, server, siteDbGroupId);
+
+            if (!isSync)
+            {
+                var logIds = queryLogService.GetLogIds(lastLog);
+                sendMailService.SendMail($"SiteDbGroupId:{siteDbGroupId} - Failed to sync with logIds: {logIds}");
             }
         }
     }

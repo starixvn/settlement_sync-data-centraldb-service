@@ -1,53 +1,79 @@
-﻿using AutoSyncData.Constants;
-using AutoSyncData.Criteria;
-using AutoSyncData.Models;
-using Fanex.Data.Repository;
-using Fanex.Settlement.ScaleOut.Services;
+﻿using AutoSyncData.Models;
+using Microsoft.Extensions.Options;
 using System.Data;
 
 namespace AutoSyncData.Services;
 
 public interface SyncDataService
 {
-    Task UpdateLogStatus(MinMaxLog log, string server);
+    Task<bool> SyncCommandTicketToCentral(DataTable lastLog, string server, int siteDbGroupId);
 
-    Task InsertLog(DataTable table, int siteDbGroupId);
+    Task<bool> RetrySyncCommandTicketToCentral(string server, int siteDbGroupId);
 }
 
 public class SyncDataServiceImp : SyncDataService
 {
-    private readonly IDynamicRepository repository;
+    private readonly QueryLogService queryLogService;
 
-    private readonly ScaleOutSettleService scaleOutSettleService;
+    private readonly AppSettingsKey appSettingsKey;
 
-    public SyncDataServiceImp(IDynamicRepository repository, ScaleOutSettleService scaleOutSettleService)
+    public SyncDataServiceImp(
+        QueryLogService queryLogService,
+        IOptions<AppSettingsKey> appSettingsKey)
     {
-        this.repository = repository;
-        this.scaleOutSettleService = scaleOutSettleService;
+        this.queryLogService = queryLogService;
+        this.appSettingsKey = appSettingsKey.Value;
     }
 
-    public async Task UpdateLogStatus(MinMaxLog log, string server)
+    public async Task<bool> SyncCommandTicketToCentral(DataTable lastLog, string server, int siteDbGroupId)
     {
-        var criteria = new UpdateLogCriteria
+        try
         {
-            SessionId = log.SessionId,
-            MinLogId = log.MinLogId,
-            MaxLogId = log.MaxLogId,
-            DbServer = server,
-            StatusId = StatusId.Completed
-        };
-
-        await repository.ExecuteAsync(criteria);
+            await queryLogService.InsertLog(lastLog, siteDbGroupId);
+            await queryLogService.UpdateLogStatus(lastLog, server);
+            return true;
+        }
+        catch
+        {
+            return await RetrySyncCommandTicketToCentral(server, siteDbGroupId);
+        }
     }
 
-    public async Task InsertLog(DataTable table, int siteDbGroupId)
+    public async Task<bool> RetrySyncCommandTicketToCentral(string server, int siteDbGroupId)
     {
-        var criteria = new InsertLogCriteria
+        for (var i = 0; i < appSettingsKey.RetryCount; i++)
         {
-            SiteDBGroupId = siteDbGroupId,
-            SiteDBCalculationLog = table
-        };
+            var isPassed = await SyncPendingCommandTicketToCentral(server, siteDbGroupId);
+            if (isPassed)
+            {
+                return true;
+            }
+            if (i < appSettingsKey.RetryCount - 1)
+            {
+                await Task.Delay(appSettingsKey.RetryInterval);
+            }
+        }
 
-        await repository.ExecuteAsync(criteria);
+        return false;
+    }
+
+    private async Task<bool> SyncPendingCommandTicketToCentral(string server, int siteDbGroupId)
+    {
+        try
+        {
+            var latestLogPending = await queryLogService.GetLatestLogPending(server);
+            if (latestLogPending.Rows.Count == 0)
+            {
+                return true;
+            }
+
+            await queryLogService.InsertPendingLog(latestLogPending, siteDbGroupId);
+            await queryLogService.UpdateLogStatus(latestLogPending, server);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }

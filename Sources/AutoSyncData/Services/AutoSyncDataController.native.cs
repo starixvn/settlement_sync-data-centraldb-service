@@ -6,7 +6,7 @@ namespace AutoSyncData.Services;
 
 public interface AutoSyncDataController
 {
-    void ProcessAsync();
+    void Process();
 }
 
 public class AutoSyncDataControllerImp : AutoSyncDataController
@@ -17,23 +17,28 @@ public class AutoSyncDataControllerImp : AutoSyncDataController
 
     private readonly AppSettingsKey appSettingsKey;
 
-    public AutoSyncDataControllerImp(SyncDataController syncDataController, IOptions<AppSettingsKey> appSettingsKey, ScaleOutSettleService scaleOutSettleService)
+    public AutoSyncDataControllerImp(
+        SyncDataController syncDataController,
+        IOptions<AppSettingsKey> appSettingsKey,
+        ScaleOutSettleService scaleOutSettleService)
     {
         this.syncDataController = syncDataController;
         this.appSettingsKey = appSettingsKey.Value;
         this.scaleOutSettleService = scaleOutSettleService;
     }
 
-    public void ProcessAsync()
+    public void Process()
     {
         var servers = appSettingsKey.SiteDbServer;
-        var siteDbGroupId = scaleOutSettleService.GetSiteGroupId(servers[0]);
+        //var siteDbGroupId = await scaleOutSettleService.GetSiteGroupId(servers[0]);
 
-        syncDataController.Process(servers[0], siteDbGroupId.Result);
-        //servers.ForEach(server =>
-        //{
-        //    Task.Run(() => syncDataController.Process(server))
-        //        .ConfigureAwait(false);
-        //});
+        //await syncDataController.Process(servers[0], siteDbGroupId);
+        servers.ForEach(server =>
+        {
+            var siteDbGroupId = scaleOutSettleService.GetSiteGroupId(server);
+
+            Task.Run(() => syncDataController.Process(server, siteDbGroupId.Result))
+                .ConfigureAwait(false);
+        });
     }
 }

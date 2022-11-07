@@ -21,12 +21,15 @@ public static class AutoSyncDataInjector
         service.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         service.AddSingleton<GeneralService, GeneralServiceImp>();
         service.AddSingleton<ScaleOutSettleService, ScaleOutSettleServiceImp>();
+
         service.AddSingleton<IDynamicRepository, DynamicRepository>();
         service.AddSingleton<AutoSyncDataController, AutoSyncDataControllerImp>();
-        service.AddSingleton<LogDetailService, LogDetailServiceImp>();
+        service.AddSingleton<QueryLogService, QueryLogServiceImp>();
         service.AddSingleton<SyncDataController, SyncDataControllerImp>();
         service.AddSingleton<SyncDataService, SyncDataServiceImp>();
         service.AddSingleton<SyncDataHandler, SyncDataHandlerImp>();
+        service.AddSingleton<SendMailService, SendMailServiceImp>();
+
         service.AddSingleton(new UMClientConfiguration().Initialize(configuration));
         service.AddSingleton<IUMCacheService, UMCacheService>();
         service.AddSingleton<IUMRestClient, UMRestClient>();
@@ -38,6 +41,7 @@ public static class AutoSyncDataInjector
     private static IServiceCollection AddAutoMapper(this IServiceCollection services)
     {
         var mapperConfig = new MapperConfiguration(mc => { });
+
         var mapper = mapperConfig.CreateMapper();
         services.AddSingleton(mapper);
         return services;
