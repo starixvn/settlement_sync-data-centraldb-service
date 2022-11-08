@@ -1,19 +1,10 @@
-﻿using AutoMapper;
-using AutoSyncData.Constants;
-using AutoSyncData.Criteria;
-using Fanex.Data;
-using Fanex.Data.Repository;
-using System.Data;
-
-namespace AutoSyncData.Services;
+﻿namespace AutoSyncData.Services;
 
 public interface QueryLogService
 {
     Task<DataTable> GetLatestLogPending(string server);
 
     Task<DataTable> GetLatestLog(string server, int batchSize);
-
-    //LogsStatus GetLogsStatus(DataTable lastLog, string server);
 
     Task UpdateLogStatus(DataTable lastLog, string server);
 
@@ -28,12 +19,9 @@ public class QueryLogServiceImp : QueryLogService
 {
     private readonly IDynamicRepository repository;
 
-    private readonly IMapper mapper;
-
-    public QueryLogServiceImp(IDynamicRepository repository, IMapper mapper)
+    public QueryLogServiceImp(IDynamicRepository repository)
     {
         this.repository = repository;
-        this.mapper = mapper;
     }
 
     public async Task<DataTable> GetLatestLog(string server, int batchSize)
@@ -73,17 +61,6 @@ public class QueryLogServiceImp : QueryLogService
         var ids = latestLogTable.Rows.OfType<DataRow>().Select(dr => dr.Field<Int64>("LogId")!.ToString());
         return string.Join(",", ids);
     }
-
-    //public LogsStatus GetLogsStatus(DataTable lastLog, string server)
-    //{
-    //    var logIds = GetLogIds(lastLog);
-    //    return new LogsStatus
-    //    {
-    //        LogIds = logIds,
-    //        DbServer = server,
-    //        StatusId = Status.Completed
-    //    };
-    //}
 
     public async Task UpdateLogStatus(DataTable lastLog, string server)
     {

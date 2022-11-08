@@ -1,14 +1,10 @@
-﻿using AutoSyncData.Models;
-using Microsoft.Extensions.Options;
-using System.Data;
-
-namespace AutoSyncData.Services;
+﻿namespace AutoSyncData.Services;
 
 public interface SyncDataService
 {
-    Task<bool> SyncCommandTicketToCentral(DataTable lastLog, string server, int siteDbGroupId);
+    Task<bool> SyncCommandTicketToCentral(DataTable lastLog, SiteInfo siteInfo);
 
-    Task<bool> RetrySyncCommandTicketToCentral(string server, int siteDbGroupId);
+    Task<bool> RetrySyncCommandTicketToCentral(SiteInfo siteInfo);
 }
 
 public class SyncDataServiceImp : SyncDataService
@@ -25,25 +21,25 @@ public class SyncDataServiceImp : SyncDataService
         this.appSettingsKey = appSettingsKey.Value;
     }
 
-    public async Task<bool> SyncCommandTicketToCentral(DataTable lastLog, string server, int siteDbGroupId)
+    public async Task<bool> SyncCommandTicketToCentral(DataTable lastLog, SiteInfo siteInfo)
     {
         try
         {
-            await queryLogService.InsertLog(lastLog, siteDbGroupId);
-            await queryLogService.UpdateLogStatus(lastLog, server);
+            await queryLogService.InsertLog(lastLog, siteInfo.SiteGroupId);
+            await queryLogService.UpdateLogStatus(lastLog, siteInfo.AliasName);
             return true;
         }
         catch
         {
-            return await RetrySyncCommandTicketToCentral(server, siteDbGroupId);
+            return await RetrySyncCommandTicketToCentral(siteInfo);
         }
     }
 
-    public async Task<bool> RetrySyncCommandTicketToCentral(string server, int siteDbGroupId)
+    public async Task<bool> RetrySyncCommandTicketToCentral(SiteInfo siteInfo)
     {
         for (var i = 0; i < appSettingsKey.RetryCount; i++)
         {
-            var isPassed = await SyncPendingCommandTicketToCentral(server, siteDbGroupId);
+            var isPassed = await SyncPendingCommandTicketToCentral(siteInfo);
             if (isPassed)
             {
                 return true;
@@ -57,18 +53,18 @@ public class SyncDataServiceImp : SyncDataService
         return false;
     }
 
-    private async Task<bool> SyncPendingCommandTicketToCentral(string server, int siteDbGroupId)
+    private async Task<bool> SyncPendingCommandTicketToCentral(SiteInfo siteInfo)
     {
         try
         {
-            var latestLogPending = await queryLogService.GetLatestLogPending(server);
+            var latestLogPending = await queryLogService.GetLatestLogPending(siteInfo.AliasName);
             if (latestLogPending.Rows.Count == 0)
             {
                 return true;
             }
 
-            await queryLogService.InsertPendingLog(latestLogPending, siteDbGroupId);
-            await queryLogService.UpdateLogStatus(latestLogPending, server);
+            await queryLogService.InsertPendingLog(latestLogPending, siteInfo.SiteGroupId);
+            await queryLogService.UpdateLogStatus(latestLogPending, siteInfo.AliasName);
             return true;
         }
         catch

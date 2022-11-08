@@ -1,7 +1,4 @@
-﻿using Fanex.Data;
-using Fanex.Data.Repository;
-
-namespace AutoSyncData.Criteria;
+﻿namespace AutoSyncData.Criteria;
 
 public class GetLatestLogCriteria : CriteriaBase
 {

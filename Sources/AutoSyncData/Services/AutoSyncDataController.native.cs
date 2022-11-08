@@ -1,8 +1,4 @@
-﻿using AutoSyncData.Models;
-using Fanex.Settlement.ScaleOut.Services;
-using Microsoft.Extensions.Options;
-
-namespace AutoSyncData.Services;
+﻿namespace AutoSyncData.Services;
 
 public interface AutoSyncDataController
 {
@@ -30,14 +26,15 @@ public class AutoSyncDataControllerImp : AutoSyncDataController
     public void Process()
     {
         var servers = appSettingsKey.SiteDbServer;
-        //var siteDbGroupId = await scaleOutSettleService.GetSiteGroupId(servers[0]);
-
-        //await syncDataController.Process(servers[0], siteDbGroupId);
         servers.ForEach(server =>
         {
-            var siteDbGroupId = scaleOutSettleService.GetSiteGroupId(server);
-
-            Task.Run(() => syncDataController.Process(server, siteDbGroupId.Result))
+            var siteGroupId = scaleOutSettleService.GetSiteGroupId(server);
+            var siteInfo = new SiteInfo
+            {
+                AliasName = server,
+                SiteGroupId = siteGroupId.Result
+            };
+            Task.Run(() => syncDataController.Process(siteInfo))
                 .ConfigureAwait(false);
         });
     }

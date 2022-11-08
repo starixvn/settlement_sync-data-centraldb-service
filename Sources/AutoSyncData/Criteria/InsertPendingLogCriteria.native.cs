@@ -1,7 +1,4 @@
-﻿using Fanex.Data.Repository;
-using System.Data;
-
-namespace AutoSyncData.Criteria;
+﻿namespace AutoSyncData.Criteria;
 
 public class InsertPendingLogCriteria : NonQueryCommand
 {

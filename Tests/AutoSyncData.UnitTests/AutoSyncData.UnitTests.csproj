@@ -7,15 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Services\SyncDataHandlerTests.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="..\..\Sources\Fanex.AutoSyncDataCentralDb.Service\appsettings.json" Link="appsettings.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fanex.Settlement.ScaleOut" Version="1.2.5" />
+    <PackageReference Include="Fanex.Logging.Sentry.RavenClient" Version="1.0.1" />
+    <PackageReference Include="Fanex.Settlement.ScaleOut" Version="1.2.6" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.2" />
     <PackageReference Include="NSubstitute" Version="4.4.0" />

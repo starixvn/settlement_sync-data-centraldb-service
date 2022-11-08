@@ -1,8 +1,4 @@
-﻿using AutoSyncData.Models;
-using Fanex.MailDeliver.Model;
-using Microsoft.Extensions.Options;
-
-namespace AutoSyncData.Services;
+﻿namespace AutoSyncData.Services;
 
 public interface SendMailService
 {

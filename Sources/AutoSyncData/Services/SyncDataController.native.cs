@@ -2,7 +2,7 @@
 
 public interface SyncDataController
 {
-    Task Process(string server, int siteDbGroupId);
+    Task Process(SiteInfo siteInfo);
 }
 
 public class SyncDataControllerImp : SyncDataController
@@ -15,19 +15,19 @@ public class SyncDataControllerImp : SyncDataController
         this.syncDataHandler = syncDataHandler;
     }
 
-    private async Task Start(string server, int siteDbGroupId)
+    private async Task Start(SiteInfo siteInfo)
     {
         var isStart = await syncDataHandler.IsStartService();
 
         if (isStart)
         {
-            await syncDataHandler.StartHandle(server, siteDbGroupId);
+            await syncDataHandler.StartHandle(siteInfo);
         }
     }
 
-    public async Task Process(string server, int siteDbGroupId)
+    public async Task Process(SiteInfo siteInfo)
     {
-        await Start(server, siteDbGroupId);
+        await Start(siteInfo);
 
         while (true)
         {
@@ -39,7 +39,7 @@ public class SyncDataControllerImp : SyncDataController
                 continue;
             }
 
-            await syncDataHandler.ProcessHandle(server, siteDbGroupId);
+            await syncDataHandler.ProcessHandle(siteInfo);
         }
     }
 }
