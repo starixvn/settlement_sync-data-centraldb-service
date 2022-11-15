@@ -58,7 +58,15 @@ public class AutoSyncDataService : IHostedService
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        MainProcess();
+        try
+        {
+            autoSyncDataController.Process();
+        }
+        catch (Exception exception)
+        {
+            LogService.Error("AutoSyncDataCentralDb - Exception in main thread - Process:", exception);
+        }
+
         Console.WriteLine($"Auto Sync Data Starting at {DateTime.Now}");
         return Task.CompletedTask;
     }
@@ -67,18 +75,6 @@ public class AutoSyncDataService : IHostedService
     {
         Console.WriteLine($"Auto Sync Data Stopping at {DateTime.Now}");
         return Task.CompletedTask;
-    }
-
-    private void MainProcess()
-    {
-        try
-        {
-            autoSyncDataController.ProcessAsync();
-        }
-        catch (Exception exception)
-        {
-            LogService.Error("AutoSyncDataCentralDb - Exception in main thread - Process:", exception);
-        }
     }
 
     private void StartUmSetting()

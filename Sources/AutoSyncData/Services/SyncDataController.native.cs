@@ -2,7 +2,7 @@
 
 public interface SyncDataController
 {
-    Task Process(string server);
+    Task Process(SiteInfo siteInfo);
 }
 
 public class SyncDataControllerImp : SyncDataController
@@ -15,8 +15,20 @@ public class SyncDataControllerImp : SyncDataController
         this.syncDataHandler = syncDataHandler;
     }
 
-    public async Task Process(string server)
+    private async Task Start(SiteInfo siteInfo)
     {
+        var isStart = await syncDataHandler.IsStartService();
+
+        if (isStart)
+        {
+            await syncDataHandler.StartHandle(siteInfo);
+        }
+    }
+
+    public async Task Process(SiteInfo siteInfo)
+    {
+        await Start(siteInfo);
+
         while (true)
         {
             var isStart = await syncDataHandler.IsStartService();
@@ -27,7 +39,7 @@ public class SyncDataControllerImp : SyncDataController
                 continue;
             }
 
-            await syncDataHandler.Handle(server);
+            await syncDataHandler.ProcessHandle(siteInfo);
         }
     }
 }

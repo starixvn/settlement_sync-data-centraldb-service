@@ -1,7 +1,10 @@
-﻿using AutoSyncData.Services;
+﻿using AutoMapper;
+using AutoSyncData.Services;
 using Fanex.Caching;
 using Fanex.Caching.Redis;
 using Fanex.Data.Repository;
+using Fanex.Settlement.ScaleOut.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ONEbook.UM.AspNetCore;
@@ -15,19 +18,33 @@ public static class AutoSyncDataInjector
 {
     public static void InitializeServices(this IServiceCollection service, IConfiguration configuration)
     {
+        service.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+        service.AddSingleton<GeneralService, GeneralServiceImp>();
+        service.AddSingleton<ScaleOutSettleService, ScaleOutSettleServiceImp>();
+
         service.AddSingleton<IDynamicRepository, DynamicRepository>();
         service.AddSingleton<AutoSyncDataController, AutoSyncDataControllerImp>();
-        service.AddSingleton<LogDetailService, LogDetailServiceImp>();
-        service.AddSingleton<SendMailService, SendMailServiceImp>();
+        service.AddSingleton<QueryLogService, QueryLogServiceImp>();
         service.AddSingleton<SyncDataController, SyncDataControllerImp>();
         service.AddSingleton<SyncDataService, SyncDataServiceImp>();
-        service.AddSingleton<ValidationService, ValidationServiceImp>();
         service.AddSingleton<SyncDataHandler, SyncDataHandlerImp>();
+        service.AddSingleton<SendMailService, SendMailServiceImp>();
+
         service.AddSingleton(new UMClientConfiguration().Initialize(configuration));
         service.AddSingleton<IUMCacheService, UMCacheService>();
         service.AddSingleton<IUMRestClient, UMRestClient>();
         service.AddSingleton<ONEbook.UM.Services.IMaintenanceService, ONEbook.UM.Services.MaintenanceService>();
         service.AddConfigRedisCache(configuration);
+        service.AddAutoMapper();
+    }
+
+    private static IServiceCollection AddAutoMapper(this IServiceCollection services)
+    {
+        var mapperConfig = new MapperConfiguration(mc => { });
+
+        var mapper = mapperConfig.CreateMapper();
+        services.AddSingleton(mapper);
+        return services;
     }
 
     private static IServiceCollection AddConfigRedisCache(this IServiceCollection service, IConfiguration configuration)

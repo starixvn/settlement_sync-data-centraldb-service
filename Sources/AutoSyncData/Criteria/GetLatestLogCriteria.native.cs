@@ -1,12 +1,11 @@
-﻿using Fanex.Data;
-using Fanex.Data.Repository;
+﻿namespace AutoSyncData.Criteria;
 
-namespace AutoSyncData.Criteria;
-
-public class GetLastestLogCriteria : CriteriaBase
+public class GetLatestLogCriteria : CriteriaBase
 {
     [SpParam(Ignored = true)]
     public string DbServer { get; set; }
+
+    public int Batch { get; set; }
 
     public override string GetSettingKey()
     {

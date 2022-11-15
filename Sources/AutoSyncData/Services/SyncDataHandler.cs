@@ -1,110 +1,105 @@
-﻿using AutoSyncData.Constants;
-using AutoSyncData.Models;
-using Fanex.Caching;
-using Fanex.Logging;
+﻿namespace AutoSyncData.Services;
 
-namespace AutoSyncData.Services
+public interface SyncDataHandler
 {
-    public interface SyncDataHandler
-    {
-        Task<bool> IsStartService();
+    Task<bool> IsStartService();
 
-        Task Handle(string server);
+    Task StartHandle(SiteInfo siteInfo);
+
+    Task ProcessHandle(SiteInfo siteInfo);
+}
+
+public class SyncDataHandlerImp : SyncDataHandler
+{
+    private const string AutoSyncKey = "Settlement-Auto-Sync-Sportsbook";
+
+    private const int TimeDelayGetLog = 500;
+
+    private const int BatchSize = 10;
+
+    private readonly ICache cache;
+
+    private readonly QueryLogService queryLogService;
+
+    private readonly SyncDataService syncDataService;
+
+    private readonly SendMailService sendMailService;
+
+    public SyncDataHandlerImp(
+        ICache cache,
+        QueryLogService queryLogService,
+        SyncDataService syncDataService,
+        SendMailService sendMailService)
+    {
+        this.cache = cache;
+        this.queryLogService = queryLogService;
+        this.syncDataService = syncDataService;
+        this.sendMailService = sendMailService;
     }
 
-    public class SyncDataHandlerImp : SyncDataHandler
+    public async Task<bool> IsStartService()
     {
-        private const string AutoSyncKey = "Settlement-Auto-Sync-Sportsbook";
-        private const int TimeDelayGetLog = 500;
-
-        private readonly ICache cache;
-        private readonly LogDetailService logDetailService;
-        private readonly ValidationService validationService;
-        private readonly SyncDataService syncDataService;
-        private readonly SendMailService sendMailService;
-
-        public SyncDataHandlerImp(
-            ICache cache,
-            LogDetailService logDetailService,
-            ValidationService validationService,
-            SyncDataService syncDataService,
-            SendMailService sendMailService)
+        try
         {
-            this.cache = cache;
-            this.logDetailService = logDetailService;
-            this.validationService = validationService;
-            this.syncDataService = syncDataService;
-            this.sendMailService = sendMailService;
-        }
-
-        public async Task<bool> IsStartService()
-        {
-            try
+            var isExistedKey = await cache.ContainAsync(AutoSyncKey);
+            if (isExistedKey)
             {
-                var isExistedKey = await cache.ContainAsync(AutoSyncKey);
-                if (isExistedKey)
-                {
-                    var (_, value) = await cache.TryGetAsync<bool>(AutoSyncKey);
-                    return value;
-                }
-
-                return true;
+                var (_, value) = await cache.TryGetAsync<bool>(AutoSyncKey);
+                return value;
             }
-            catch
+
+            return true;
+        }
+        catch
+        {
+            return true;
+        }
+    }
+
+    public async Task StartHandle(SiteInfo siteInfo)
+    {
+        try
+        {
+            var isSync = await syncDataService.RetrySyncCommandTicketToCentral(siteInfo);
+
+            if (!isSync)
             {
-                return true;
+                sendMailService.SendMail($"SiteDbGroupId:{siteInfo.SiteGroupId} - Pending log is still wrong when restarting service.");
             }
         }
-
-        public async Task Handle(string server)
+        catch (Exception exception)
         {
-            try
-            {
-                var logDetail = await logDetailService.GetLatestLog(server);
-
-                if (logDetail.LogId <= 0)
-                {
-                    await Task.Delay(TimeDelayGetLog);
-                    return;
-                }
-
-                await syncDataService.UpdateLogDetail(logDetail, StatusId.Waiting, string.Empty);
-
-                var isTicketsValid = await validationService.ValidateTickets(logDetail);
-                if (isTicketsValid)
-                {
-                    await SyncTicketToCentral(logDetail);
-                }
-                else
-                {
-                    await UpdateLogDetailAndSendMail(logDetail, "Failed in validation ticket count");
-                }
-            }
-            catch (Exception exception)
-            {
-                await LogService.ErrorAsync($"AutoSyncDataCentralDb - Server:{server} - Exception in main thread - Process:{exception}");
-            }
+            await LogService.ErrorAsync($"AutoSyncDataCentralDb - Server:{siteInfo.AliasName} - Restarting service:{exception}");
         }
+    }
 
-        private async Task SyncTicketToCentral(LogDetail logDetail)
+    public async Task ProcessHandle(SiteInfo siteInfo)
+    {
+        try
         {
-            await syncDataService.UpdateLogDetail(logDetail, StatusId.Running, string.Empty);
-            var result = await syncDataService.SyncData(logDetail);
+            var lastLog = await queryLogService.GetLatestLog(siteInfo.AliasName, BatchSize);
+            if (lastLog.Rows.Count == 0)
+            {
+                await Task.Delay(TimeDelayGetLog);
+                return;
+            }
 
-            if (result.ErrCode == 0)
-            {
-                await syncDataService.UpdateLogDetail(logDetail, StatusId.Completed, string.Empty);
-            }
-            else
-            {
-                await UpdateLogDetailAndSendMail(logDetail, $"Failed to sync data: {result.ErrMsg}");
-            }
+            await SyncCommandTicketToCentral(lastLog, siteInfo);
         }
-
-        private async Task UpdateLogDetailAndSendMail(LogDetail logDetail, string message)
+        catch (Exception exception)
         {
-            await syncDataService.UpdateLogDetail(logDetail, StatusId.Failed, message);
-            sendMailService.SendMail(logDetail, message);
+            await LogService.ErrorAsync($"AutoSyncDataCentralDb - SiteDbGroupId:{siteInfo.SiteGroupId} - Exception in main thread - Process:{exception}");
+        }
+    }
+
+    private async Task SyncCommandTicketToCentral(DataTable lastLog, SiteInfo siteInfo)
+    {
+        var isSync = await syncDataService.SyncCommandTicketToCentral(lastLog, siteInfo);
+
+        if (!isSync)
+        {
+            var logIds = queryLogService.GetLogIds(lastLog);
+            sendMailService.SendMail($"SiteDbGroupId:{siteInfo.SiteGroupId} - Failed to sync with logIds: {logIds}");
         }
     }
 }
