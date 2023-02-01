@@ -19,8 +19,8 @@ public class SendMailServiceImp : SendMailService
         var mailRecord = new MailRecord
         {
             MailTo = appSettingsKey.EmailGroup,
-            Title = "NAP - Sync Data To Central DBTrans",
-            Subject = $"[{appSettingsKey.EnvironmentName}] - Sync Data issue",
+            Title = "NAP - Sync Log",
+            Subject = $"[{appSettingsKey.EnvironmentName}] - Sync Log issue",
             Body = message
         };
 

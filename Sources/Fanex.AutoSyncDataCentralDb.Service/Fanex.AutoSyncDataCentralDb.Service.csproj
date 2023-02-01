@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -25,9 +25,9 @@
     <PackageReference Include="ONEbook.UM.AspNetCore" Version="3.1.0" />
     <PackageReference Include="ONEbook.UM.Transport" Version="3.1.1" />
   </ItemGroup>
-  
+
   <ItemGroup>
-    <Content Include="appsettings.LOCAL1.json">
+    <Content Include="appsettings.DEV.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="appsettings.json">
@@ -48,20 +48,19 @@
     <Content Include="App_Data\SpName.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-  </ItemGroup><ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="appsettings.DEV.json" />
     <None Remove="appsettings.json" />
     <None Remove="appsettings.LOCAL.json" />
-    <None Remove="appsettings.LOCAL1.json" />
     <None Remove="appsettings.PROD.json" />
     <None Remove="appsettings.SIT.json" />
     <None Remove="appsettings.UAT.json" />
     <None Remove="App_Data\SpName.xml" />
     <None Remove="auto-league-settings.ini" />
-  </ItemGroup>  
-  
-  
- 
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\AutoSyncData\AutoSyncData.csproj" />
-  </ItemGroup>  
+  </ItemGroup>
 </Project>

@@ -64,16 +64,16 @@ public class AutoSyncDataService : IHostedService
         }
         catch (Exception exception)
         {
-            LogService.Error("AutoSyncDataCentralDb - Exception in main thread - Process:", exception);
+            LogService.Error("AutoSyncLog - Exception in main thread - Process:", exception);
         }
 
-        Console.WriteLine($"Auto Sync Data Starting at {DateTime.Now}");
+        Console.WriteLine($"Auto Sync Log is starting at {DateTime.Now}");
         return Task.CompletedTask;
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        Console.WriteLine($"Auto Sync Data Stopping at {DateTime.Now}");
+        Console.WriteLine($"Auto Sync Log is stopping at {DateTime.Now}");
         return Task.CompletedTask;
     }
 
