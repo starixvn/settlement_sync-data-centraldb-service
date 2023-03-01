@@ -69,7 +69,7 @@ public class SyncDataHandlerImp : SyncDataHandler
         }
         catch (Exception exception)
         {
-            await LogService.ErrorAsync($"AutoSyncDataCentralDb - Server:{siteInfo.AliasName} - Restarting service:{exception}");
+            await LogService.ErrorAsync($"AutoSyncLog - Server:{siteInfo.AliasName} - Restarting service:{exception}");
         }
     }
 
@@ -88,7 +88,7 @@ public class SyncDataHandlerImp : SyncDataHandler
         }
         catch (Exception exception)
         {
-            await LogService.ErrorAsync($"AutoSyncDataCentralDb - SiteDbGroupId:{siteInfo.SiteGroupId} - Exception in main thread - Process:{exception}");
+            await LogService.ErrorAsync($"AutoSyncLog - SiteDbGroupId:{siteInfo.SiteGroupId} - Exception in main thread - Process:{exception}");
         }
     }
 
