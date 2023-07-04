@@ -40,7 +40,7 @@ public static class AutoSyncDataInjector
 
     private static IServiceCollection AddAutoMapper(this IServiceCollection services)
     {
-        var mapperConfig = new MapperConfiguration(mc => { });
+        var mapperConfig = new MapperConfiguration(_ => { });
 
         var mapper = mapperConfig.CreateMapper();
         services.AddSingleton(mapper);

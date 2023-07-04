@@ -16,7 +16,7 @@ using ONEbook.UM.Configurations;
 using ONEbook.UM.Transport;
 using SharpRaven;
 
-namespace Fanex.AutoSyncDataCentralDb;
+namespace Fanex.AutoSyncDataCentralDb.Service;
 
 public class AutoSyncDataService : IHostedService
 {
