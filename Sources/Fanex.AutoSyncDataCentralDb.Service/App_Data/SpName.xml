@@ -1,29 +1,33 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Functions>
-	<Function Name="AutoSyncData">
-		<Setting Key="NAP_SettlementService_PendingLogIns" SpName="NAP_SettlementService_PendingLogIns" DbName="DBTXN.bodb02.bodbAdminNet" TimeOut="60" />
-		<Setting Key="NAP_SettlementService_CalculationLogIns" SpName="NAP_SettlementService_CalculationLogIns" DbName="DBTXN.bodb02.bodbAdminNet" TimeOut="60" />
-	</Function>
+  <Function Name="AutoSyncData">
+    <Setting Key="NAP_SettlementService_PendingLogIns" SpName="NAP_SettlementService_PendingLogIns" DbName="DBTXN.bodb02.bodbAdminNet" TimeOut="60" />
+    <Setting Key="NAP_SettlementService_CalculationLogIns" SpName="NAP_SettlementService_CalculationLogIns" DbName="DBTXN.bodb02.bodbAdminNet" TimeOut="60" />
+  </Function>
 
-	<Function Name="SiteDb">
-		<Function Name="Get_SiteDBGroupID">
-			<Setting Key="Get_SiteDBGroupID_DBSID01" SpName="Get_SiteDBGroupID" DbName="DBSID01.bodb02.bodbAdminNet" />
-			<Setting Key="Get_SiteDBGroupID_DBSID02" SpName="Get_SiteDBGroupID" DbName="DBSID02.bodb02.bodbAdminNet" />
-		</Function>
+  <Function Name="SiteDb">
+    <Function Name="Get_SiteDBGroupID">
+      <Setting Key="Get_SiteDBGroupID_DBSID01" SpName="Get_SiteDBGroupID" DbName="DBSID01.bodb02.bodbAdminNet" />
+      <Setting Key="Get_SiteDBGroupID_DBSID02" SpName="Get_SiteDBGroupID" DbName="DBSID02.bodb02.bodbAdminNet" />
+      <Setting Key="Get_SiteDBGroupID_DBSID03" SpName="Get_SiteDBGroupID" DbName="DBSID03.bodb02.bodbAdminNet" />
+    </Function>
 
-		<Function Name="SiteDB_NAP_SettlementService_CalculationLogSel">
-			<Setting Key="SiteDB_NAP_SettlementService_CalculationLogSel_DBSID01" SpName="SiteDB_NAP_SettlementService_CalculationLogSel" DbName="DBSID01.bodb02.bodbAdminNet" />
-			<Setting Key="SiteDB_NAP_SettlementService_CalculationLogSel_DBSID02" SpName="SiteDB_NAP_SettlementService_CalculationLogSel" DbName="DBSID02.bodb02.bodbAdminNet" />
-		</Function>
+    <Function Name="SiteDB_NAP_SettlementService_CalculationLogSel">
+      <Setting Key="SiteDB_NAP_SettlementService_CalculationLogSel_DBSID01" SpName="SiteDB_NAP_SettlementService_CalculationLogSel" DbName="DBSID01.bodb02.bodbAdminNet" />
+      <Setting Key="SiteDB_NAP_SettlementService_CalculationLogSel_DBSID02" SpName="SiteDB_NAP_SettlementService_CalculationLogSel" DbName="DBSID02.bodb02.bodbAdminNet" />
+      <Setting Key="SiteDB_NAP_SettlementService_CalculationLogSel_DBSID03" SpName="SiteDB_NAP_SettlementService_CalculationLogSel" DbName="DBSID03.bodb02.bodbAdminNet" />
+    </Function>
 
-		<Function Name="SiteDB_NAP_SettlementService_CalculationLogUpd">
-			<Setting Key="SiteDB_NAP_SettlementService_CalculationLogUpd_DBSID01" SpName="SiteDB_NAP_SettlementService_CalculationLogUpd" DbName="DBSID01.bodb02.bodbAdminNet" TimeOut="60" />
-			<Setting Key="SiteDB_NAP_SettlementService_CalculationLogUpd_DBSID02" SpName="SiteDB_NAP_SettlementService_CalculationLogUpd" DbName="DBSID02.bodb02.bodbAdminNet" TimeOut="60" />
-		</Function>
+    <Function Name="SiteDB_NAP_SettlementService_CalculationLogUpd">
+      <Setting Key="SiteDB_NAP_SettlementService_CalculationLogUpd_DBSID01" SpName="SiteDB_NAP_SettlementService_CalculationLogUpd" DbName="DBSID01.bodb02.bodbAdminNet" TimeOut="60" />
+      <Setting Key="SiteDB_NAP_SettlementService_CalculationLogUpd_DBSID02" SpName="SiteDB_NAP_SettlementService_CalculationLogUpd" DbName="DBSID02.bodb02.bodbAdminNet" TimeOut="60" />
+      <Setting Key="SiteDB_NAP_SettlementService_CalculationLogUpd_DBSID03" SpName="SiteDB_NAP_SettlementService_CalculationLogUpd" DbName="DBSID03.bodb02.bodbAdminNet" TimeOut="60" />
+    </Function>
 
-		<Function Name="SiteDB_NAP_SettlementService_PendingLog">
-			<Setting Key="SiteDB_NAP_SettlementService_PendingLog_DBSID01" SpName="SiteDB_NAP_SettlementService_PendingLog" DbName="DBSID01.bodb02.bodbAdminNet" />
-			<Setting Key="SiteDB_NAP_SettlementService_PendingLog_DBSID02" SpName="SiteDB_NAP_SettlementService_PendingLog" DbName="DBSID02.bodb02.bodbAdminNet" />
-		</Function>
-	</Function>
+    <Function Name="SiteDB_NAP_SettlementService_PendingLog">
+      <Setting Key="SiteDB_NAP_SettlementService_PendingLog_DBSID01" SpName="SiteDB_NAP_SettlementService_PendingLog" DbName="DBSID01.bodb02.bodbAdminNet" />
+      <Setting Key="SiteDB_NAP_SettlementService_PendingLog_DBSID02" SpName="SiteDB_NAP_SettlementService_PendingLog" DbName="DBSID02.bodb02.bodbAdminNet" />
+      <Setting Key="SiteDB_NAP_SettlementService_PendingLog_DBSID03" SpName="SiteDB_NAP_SettlementService_PendingLog" DbName="DBSID03.bodb02.bodbAdminNet" />
+    </Function>
+  </Function>
 </Functions>
