@@ -1,7 +1,5 @@
 ﻿using AutoSyncData.Services;
 using Fanex.Caching;
-using Fanex.Data;
-using Fanex.Data.SqlServer;
 using Fanex.Logging;
 using Fanex.Logging.Extensions;
 using Fanex.Logging.Extensions.AspNetCore;
@@ -89,21 +87,6 @@ public class AutoSyncDataService : IHostedService
 
     private void ConfigureFanex()
     {
-        var connections = configuration.GetSection("ConnectionStrings")
-            .GetChildren()
-            .AsEnumerable()
-            .ToDictionary(
-                x => x.GetValue<string>("Name"),
-                y => new ConnectionConfiguration(y.GetValue<string>("Name"), y.GetValue<string>("ConnectionString"), y.GetValue<string>("ProviderName"))
-            );
-
-        DbSettingProviderManager
-            .StartNewSession()
-            .Use(connections)
-            .WithSqlServer()
-            .UseDefaultDbSettingProvider(resourcePath: configuration.GetSection("StoredProcedurePath").Value)
-            .Run();
-
         LogManager
             .SetDefaultLogCategory(configuration.GetSection("SiteCategory").Value)
             .Use(new List<ILogEngine>
