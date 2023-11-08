@@ -38,16 +38,15 @@ public static class AutoSyncDataInjector
         service.AddAutoMapper();
     }
 
-    private static IServiceCollection AddAutoMapper(this IServiceCollection services)
+    private static void AddAutoMapper(this IServiceCollection services)
     {
         var mapperConfig = new MapperConfiguration(_ => { });
 
         var mapper = mapperConfig.CreateMapper();
         services.AddSingleton(mapper);
-        return services;
     }
 
-    private static IServiceCollection AddConfigRedisCache(this IServiceCollection service, IConfiguration configuration)
+    private static void AddConfigRedisCache(this IServiceCollection service, IConfiguration configuration)
     {
         var redisConfig = configuration.GetSection("AuthSettings:RedisConfig").Value;
         var applicationName = configuration.GetSection("AuthSettings:ChannelPrefix").Value;
@@ -57,7 +56,5 @@ public static class AutoSyncDataInjector
             ApplicationName = applicationName,
         }));
         service.AddSingleton<ICacheService>(new CacheService());
-
-        return service;
     }
 }
