@@ -88,7 +88,10 @@ public class SyncDataHandlerImp : SyncDataHandler
         }
         catch (Exception exception)
         {
-            await LogService.ErrorAsync($"AutoSyncLog - SiteDbGroupId:{siteInfo.SiteGroupId} - Exception in main thread - Process:{exception}");
+            if (!exception.Message.Contains("Reason: The account is disabled"))
+            {
+                await LogService.ErrorAsync($"AutoSyncLog - SiteDbGroupId:{siteInfo.SiteGroupId} - Exception in main thread - Process:{exception}");
+            }
         }
     }
 
