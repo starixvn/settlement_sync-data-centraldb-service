@@ -124,14 +124,15 @@ public class SyncDataHandlerTests
     }
 
     [Fact]
-    public void StartHandle_SyncPendingTicketThrowException_RightExceptionMessage()
+    public async Task StartHandle_SyncPendingTicketThrowException_RightExceptionNull()
     {
         // Arrange
         syncDataService.RetrySyncCommandTicketToCentral(Arg.Any<SiteInfo>()).ThrowsAsync(new Exception());
         var handler = new SyncDataHandlerImp(cache, queryLogService, syncDataService, sendMailService);
 
         // Assert
-        Assert.ThrowsAsync<Exception>(() => handler.StartHandle(new SiteInfo()));
+        var exception = await Record.ExceptionAsync(() => handler.StartHandle(new SiteInfo()));
+        Assert.Null(exception);
     }
 
     [Fact]
@@ -196,7 +197,7 @@ public class SyncDataHandlerTests
     }
 
     [Fact]
-    public void ProcessHandle_SyncPendingTicketThrowException_RightExceptionMessage()
+    public async Task ProcessHandle_SyncPendingTicketThrowException_RightExceptionMessage()
     {
         // Arrange
         syncDataService.SyncCommandTicketToCentral(Arg.Any<DataTable>(), Arg.Any<SiteInfo>())
@@ -204,6 +205,7 @@ public class SyncDataHandlerTests
         var handler = new SyncDataHandlerImp(cache, queryLogService, syncDataService, sendMailService);
 
         // Assert
-        Assert.ThrowsAsync<Exception>(() => handler.ProcessHandle(new SiteInfo()));
+        var exception = await Record.ExceptionAsync(() => handler.ProcessHandle(new SiteInfo()));
+        Assert.Null(exception);
     }
 }
