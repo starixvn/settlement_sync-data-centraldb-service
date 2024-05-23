@@ -1,60 +1,14 @@
 ﻿using AutoSyncData.Services;
-using Fanex.Caching;
 using Fanex.Logging;
 using Fanex.Logging.Extensions;
-using Fanex.Logging.Extensions.AspNetCore;
 using Fanex.Logging.Extensions.Database;
-using Fanex.Logging.Sentry.RavenClient;
-using Fanex.MailDeliver.MailClient;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using ONEbook.UM;
-using ONEbook.UM.AspNetCore;
-using ONEbook.UM.Configurations;
-using ONEbook.UM.Transport;
-using SharpRaven;
 
 namespace Fanex.AutoSyncDataCentralDb.Service;
 
-public class AutoSyncDataService : IHostedService
+public class AutoSyncDataService(AutoSyncDataController autoSyncDataController) : BackgroundService
 {
-    private readonly AutoSyncDataController autoSyncDataController;
-
-    private readonly IConfiguration configuration;
-
-    public AutoSyncDataService(
-        AutoSyncDataController autoSyncDataController,
-        IConfiguration configuration)
-    {
-        this.autoSyncDataController = autoSyncDataController;
-        this.configuration = configuration;
-        InitializeExtraComponent();
-        InitializeSetting();
-    }
-
-    private void InitializeSetting()
-    {
-        StartUmSetting();
-        ConfigureFanex();
-        ConfigureMailSetting();
-    }
-
-    private static void InitializeExtraComponent()
-    {
-        TaskScheduler.UnobservedTaskException += TaskSchedulerUnobservedTaskException;
-    }
-
-    private static void TaskSchedulerUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
-    {
-        e.SetObserved();
-        e.Exception.Handle(x =>
-        {
-            LogService.Error(x.Message, x);
-            return true;
-        });
-    }
-
-    public Task StartAsync(CancellationToken cancellationToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
         {
@@ -62,49 +16,12 @@ public class AutoSyncDataService : IHostedService
         }
         catch (Exception exception)
         {
-            LogService.Error("AutoSyncLog - Exception in main thread - Process:", exception);
+            var logMessage = new LogMessage(exception.Message)
+                .AddSection("Database Info", DatabaseInfoGetters.GetDbExceptionInfo(exception))
+                .AddSection("Server Info", CommonInfoGetters.GetServerInfo())
+                .AddSection("Exception Info", CommonInfoGetters.GetExceptionInfo(exception))
+                .ToString();
+            await LogService.ErrorAsync(logMessage);
         }
-
-        Console.WriteLine($"Auto Sync Log is starting at {DateTime.Now}");
-        return Task.CompletedTask;
-    }
-
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        Console.WriteLine($"Auto Sync Log is stopping at {DateTime.Now}");
-        return Task.CompletedTask;
-    }
-
-    private void StartUmSetting()
-    {
-        var umConfig = new UMClientConfiguration().Initialize(configuration);
-
-        UMClientManager
-            .UseConfig(umConfig)
-            .UseCacheService(new UMCacheService(new CacheService()))
-            .UseRestClient(new UMRestClient(umConfig));
-    }
-
-    private void ConfigureFanex()
-    {
-        LogManager
-            .SetDefaultLogCategory(configuration.GetSection("SiteCategory").Value)
-            .Use(new List<ILogEngine>
-            {
-                    new SentryLogging(new SentryEngineOptions
-                    {
-                        Dsn = new Dsn(configuration.GetSection("SentryToken").Value)
-                    })
-            });
-
-        ExceptionHandler
-            .UseConfig(new LoggingConfiguration())
-            .UseGetDbExceptionInfo(DatabaseInfoGetters.GetDbExceptionInfo);
-    }
-
-    private void ConfigureMailSetting()
-    {
-        AppSettings.AppMailId = configuration.GetSection("MailServer:Id").Value;
-        AppSettings.AppMailAddress = configuration.GetSection("MailServer:Address").Value;
     }
 }

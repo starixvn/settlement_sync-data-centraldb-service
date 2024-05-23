@@ -15,15 +15,8 @@ public interface QueryLogService
     string GetLogIds(DataTable latestLogTable);
 }
 
-public class QueryLogServiceImp : QueryLogService
+public class QueryLogServiceImp(IDynamicRepository repository) : QueryLogService
 {
-    private readonly IDynamicRepository repository;
-
-    public QueryLogServiceImp(IDynamicRepository repository)
-    {
-        this.repository = repository;
-    }
-
     public async Task<DataTable> GetLatestLog(string server, int batchSize)
     {
         var getLogCriteria = new GetLatestLogCriteria

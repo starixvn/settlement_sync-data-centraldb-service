@@ -5,15 +5,9 @@ public interface SyncDataController
     Task Process(SiteInfo siteInfo);
 }
 
-public class SyncDataControllerImp : SyncDataController
+public class SyncDataControllerImp(SyncDataHandler syncDataHandler) : SyncDataController
 {
-    private readonly SyncDataHandler syncDataHandler;
     private const int TimeDelayCheckStartService = 3000;
-
-    public SyncDataControllerImp(SyncDataHandler syncDataHandler)
-    {
-        this.syncDataHandler = syncDataHandler;
-    }
 
     private async Task Start(SiteInfo siteInfo)
     {

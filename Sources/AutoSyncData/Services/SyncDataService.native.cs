@@ -7,20 +7,11 @@ public interface SyncDataService
     Task<bool> RetrySyncCommandTicketToCentral(SiteInfo siteInfo);
 }
 
-public class SyncDataServiceImp : SyncDataService
+public class SyncDataServiceImp(
+    QueryLogService queryLogService,
+    IOptions<AppSettingsKey> appSettingsKey)
+    : SyncDataService
 {
-    private readonly QueryLogService queryLogService;
-
-    private readonly AppSettingsKey appSettingsKey;
-
-    public SyncDataServiceImp(
-        QueryLogService queryLogService,
-        IOptions<AppSettingsKey> appSettingsKey)
-    {
-        this.queryLogService = queryLogService;
-        this.appSettingsKey = appSettingsKey.Value;
-    }
-
     public async Task<bool> SyncCommandTicketToCentral(DataTable lastLog, SiteInfo siteInfo)
     {
         try
@@ -37,16 +28,18 @@ public class SyncDataServiceImp : SyncDataService
 
     public async Task<bool> RetrySyncCommandTicketToCentral(SiteInfo siteInfo)
     {
-        for (var i = 0; i < appSettingsKey.RetryCount; i++)
+        var settingKey = appSettingsKey.Value;
+
+        for (var i = 0; i < settingKey.RetryCount; i++)
         {
             var isPassed = await SyncPendingCommandTicketToCentral(siteInfo);
             if (isPassed)
             {
                 return true;
             }
-            if (i < appSettingsKey.RetryCount - 1)
+            if (i < settingKey.RetryCount - 1)
             {
-                await Task.Delay(appSettingsKey.RetryInterval);
+                await Task.Delay(settingKey.RetryInterval);
             }
         }
 

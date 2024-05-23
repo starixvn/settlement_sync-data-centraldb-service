@@ -15,7 +15,6 @@ public class SyncDataHandlerTests
 {
     private readonly QueryLogService queryLogService;
     private readonly SyncDataService syncDataService;
-    private readonly SendMailService sendMailService;
     private readonly ICache cache;
     private const string AutoSyncKey = "Settlement-Auto-Sync-Sportsbook";
 
@@ -23,7 +22,6 @@ public class SyncDataHandlerTests
     {
         queryLogService = Substitute.For<QueryLogService>();
         syncDataService = Substitute.For<SyncDataService>();
-        sendMailService = Substitute.For<SendMailService>();
         cache = Substitute.For<ICache>();
 
         LogManager
@@ -42,7 +40,7 @@ public class SyncDataHandlerTests
     {
         // Arrange
         cache.ContainAsync(AutoSyncKey).Returns(false);
-        var handler = new SyncDataHandlerImp(cache, queryLogService, syncDataService, sendMailService);
+        var handler = new SyncDataHandlerImp(cache, queryLogService, syncDataService);
 
         // Act
         var result = await handler.IsStartService();
@@ -57,7 +55,7 @@ public class SyncDataHandlerTests
         // Arrange
         cache.ContainAsync(AutoSyncKey).Returns(true);
         cache.TryGetAsync<bool>(AutoSyncKey).Returns((false, false));
-        var handler = new SyncDataHandlerImp(cache, queryLogService, syncDataService, sendMailService);
+        var handler = new SyncDataHandlerImp(cache, queryLogService, syncDataService);
 
         // Act
         var result = await handler.IsStartService();
@@ -72,7 +70,7 @@ public class SyncDataHandlerTests
         // Arrange
         cache.ContainAsync(AutoSyncKey).Returns(true);
         cache.TryGetAsync<bool>(AutoSyncKey).Returns((false, true));
-        var handler = new SyncDataHandlerImp(cache, queryLogService, syncDataService, sendMailService);
+        var handler = new SyncDataHandlerImp(cache, queryLogService, syncDataService);
 
         // Act
         var result = await handler.IsStartService();
@@ -86,7 +84,7 @@ public class SyncDataHandlerTests
     {
         // Arrange
         cache.ContainAsync(Arg.Any<string>()).ThrowsAsync(new Exception());
-        var handler = new SyncDataHandlerImp(cache, queryLogService, syncDataService, sendMailService);
+        var handler = new SyncDataHandlerImp(cache, queryLogService, syncDataService);
 
         // Act
         var result = await handler.IsStartService();
@@ -96,39 +94,11 @@ public class SyncDataHandlerTests
     }
 
     [Fact]
-    public async Task StartHandle_SyncPendingTicketIsFailed_CallSendMail()
-    {
-        // Arrange
-        syncDataService.RetrySyncCommandTicketToCentral(Arg.Any<SiteInfo>()).Returns(false);
-        var handler = new SyncDataHandlerImp(cache, queryLogService, syncDataService, sendMailService);
-
-        // Act
-        await handler.StartHandle(new SiteInfo());
-
-        // Assert
-        sendMailService.Received(1).SendMail(Arg.Any<string>());
-    }
-
-    [Fact]
-    public async Task StartHandle_SyncPendingTicketSuccess_NotCallSendMail()
-    {
-        // Arrange
-        syncDataService.RetrySyncCommandTicketToCentral(Arg.Any<SiteInfo>()).Returns(true);
-        var handler = new SyncDataHandlerImp(cache, queryLogService, syncDataService, sendMailService);
-
-        // Act
-        await handler.StartHandle(new SiteInfo());
-
-        // Assert
-        sendMailService.DidNotReceive().SendMail(Arg.Any<string>());
-    }
-
-    [Fact]
     public async Task StartHandle_SyncPendingTicketThrowException_RightExceptionNull()
     {
         // Arrange
         syncDataService.RetrySyncCommandTicketToCentral(Arg.Any<SiteInfo>()).ThrowsAsync(new Exception());
-        var handler = new SyncDataHandlerImp(cache, queryLogService, syncDataService, sendMailService);
+        var handler = new SyncDataHandlerImp(cache, queryLogService, syncDataService);
 
         // Assert
         var exception = await Record.ExceptionAsync(() => handler.StartHandle(new SiteInfo()));
@@ -140,7 +110,7 @@ public class SyncDataHandlerTests
     {
         // Arrange
         queryLogService.GetLatestLog(Arg.Any<string>(), Arg.Any<int>()).Returns(new DataTable());
-        var handler = new SyncDataHandlerImp(cache, queryLogService, syncDataService, sendMailService);
+        var handler = new SyncDataHandlerImp(cache, queryLogService, syncDataService);
 
         // Act
         await handler.ProcessHandle(new SiteInfo());
@@ -150,59 +120,12 @@ public class SyncDataHandlerTests
     }
 
     [Fact]
-    public async Task ProcessHandle_GetLatestLogIsNotNullAndSyncTicketSuccess_NotCallSendMail()
-    {
-        // Arrange
-        var dt = new DataTable();
-        dt.Columns.Add("LogId", typeof(long));
-        dt.Rows.Add(9876);
-
-        queryLogService.GetLatestLog(Arg.Any<string>(), Arg.Any<int>()).Returns(dt);
-        syncDataService.SyncCommandTicketToCentral(Arg.Any<DataTable>(), Arg.Any<SiteInfo>()).Returns(true);
-
-        var handler = new SyncDataHandlerImp(cache, queryLogService, syncDataService, sendMailService);
-
-        // Act
-        await handler.ProcessHandle(new SiteInfo());
-
-        // Assert
-        await syncDataService.Received().SyncCommandTicketToCentral(Arg.Any<DataTable>(), Arg.Any<SiteInfo>());
-        sendMailService.DidNotReceive().SendMail(Arg.Any<string>());
-    }
-
-    [Fact]
-    public async Task ProcessHandle_GetLatestLogIsNotNullAndSyncTicketIsFailed_NotCallSendMail()
-    {
-        // Arrange
-        var dt = new DataTable();
-        dt.Columns.Add("LogId", typeof(long));
-        dt.Rows.Add(9876);
-
-        queryLogService.GetLogIds(Arg.Any<DataTable>()).Returns("12,24");
-        queryLogService.GetLatestLog(Arg.Any<string>(), Arg.Any<int>()).Returns(dt);
-        syncDataService.SyncCommandTicketToCentral(Arg.Any<DataTable>(), Arg.Any<SiteInfo>()).Returns(false);
-
-        var handler = new SyncDataHandlerImp(cache, queryLogService, syncDataService, sendMailService);
-
-        // Act
-        await handler.ProcessHandle(new SiteInfo());
-
-        // Assert
-        Received.InOrder(() =>
-        {
-            syncDataService.SyncCommandTicketToCentral(Arg.Any<DataTable>(), Arg.Any<SiteInfo>());
-            queryLogService.GetLogIds(Arg.Any<DataTable>());
-            sendMailService.SendMail(Arg.Any<string>());
-        });
-    }
-
-    [Fact]
     public async Task ProcessHandle_SyncPendingTicketThrowException_RightExceptionMessage()
     {
         // Arrange
         syncDataService.SyncCommandTicketToCentral(Arg.Any<DataTable>(), Arg.Any<SiteInfo>())
             .ThrowsAsync(new Exception());
-        var handler = new SyncDataHandlerImp(cache, queryLogService, syncDataService, sendMailService);
+        var handler = new SyncDataHandlerImp(cache, queryLogService, syncDataService);
 
         // Assert
         var exception = await Record.ExceptionAsync(() => handler.ProcessHandle(new SiteInfo()));

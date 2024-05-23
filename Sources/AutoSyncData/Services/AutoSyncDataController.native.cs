@@ -5,27 +5,15 @@ public interface AutoSyncDataController
     void Process();
 }
 
-public class AutoSyncDataControllerImp : AutoSyncDataController
+public class AutoSyncDataControllerImp(
+    SyncDataController syncDataController,
+    IOptions<AppSettingsKey> appSettingsKey,
+    ScaleOutSettleService scaleOutSettleService)
+    : AutoSyncDataController
 {
-    private readonly SyncDataController syncDataController;
-
-    private readonly ScaleOutSettleService scaleOutSettleService;
-
-    private readonly AppSettingsKey appSettingsKey;
-
-    public AutoSyncDataControllerImp(
-        SyncDataController syncDataController,
-        IOptions<AppSettingsKey> appSettingsKey,
-        ScaleOutSettleService scaleOutSettleService)
-    {
-        this.syncDataController = syncDataController;
-        this.appSettingsKey = appSettingsKey.Value;
-        this.scaleOutSettleService = scaleOutSettleService;
-    }
-
     public void Process()
     {
-        var servers = appSettingsKey.SiteDbServer;
+        var servers = appSettingsKey.Value.SiteDbServer;
         servers.ForEach(server =>
         {
             var siteGroupId = scaleOutSettleService.GetSiteGroupId(server);

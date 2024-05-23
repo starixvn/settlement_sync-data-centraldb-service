@@ -9,33 +9,17 @@ public interface SyncDataHandler
     Task ProcessHandle(SiteInfo siteInfo);
 }
 
-public class SyncDataHandlerImp : SyncDataHandler
+public class SyncDataHandlerImp(
+    ICache cache,
+    QueryLogService queryLogService,
+    SyncDataService syncDataService)
+    : SyncDataHandler
 {
     private const string AutoSyncKey = "Settlement-Auto-Sync-Sportsbook";
 
     private const int TimeDelayGetLog = 500;
 
     private const int BatchSize = 10;
-
-    private readonly ICache cache;
-
-    private readonly QueryLogService queryLogService;
-
-    private readonly SyncDataService syncDataService;
-
-    private readonly SendMailService sendMailService;
-
-    public SyncDataHandlerImp(
-        ICache cache,
-        QueryLogService queryLogService,
-        SyncDataService syncDataService,
-        SendMailService sendMailService)
-    {
-        this.cache = cache;
-        this.queryLogService = queryLogService;
-        this.syncDataService = syncDataService;
-        this.sendMailService = sendMailService;
-    }
 
     public async Task<bool> IsStartService()
     {
@@ -64,12 +48,12 @@ public class SyncDataHandlerImp : SyncDataHandler
 
             if (!isSync)
             {
-                sendMailService.SendMail($"SiteDbGroupId:{siteInfo.SiteGroupId} - Pending log is still wrong when restarting service.");
+                await WriteErrorLog(siteInfo.AliasName, "Pending log is still wrong when restarting service.");
             }
         }
         catch (Exception exception)
         {
-            await LogService.ErrorAsync($"AutoSyncLog - Server:{siteInfo.AliasName} - Restarting service:{exception}");
+            await WriteErrorLog(siteInfo.AliasName, $"Restarting service:{exception}");
         }
     }
 
@@ -90,7 +74,7 @@ public class SyncDataHandlerImp : SyncDataHandler
         {
             if (!exception.Message.Contains("Reason: The account is disabled"))
             {
-                await LogService.ErrorAsync($"AutoSyncLog - SiteDbGroupId:{siteInfo.SiteGroupId} - Exception in main thread - Process:{exception}");
+                await WriteErrorLog(siteInfo.AliasName, $"Exception in main thread - Process:{exception}");
             }
         }
     }
@@ -102,7 +86,12 @@ public class SyncDataHandlerImp : SyncDataHandler
         if (!isSync)
         {
             var logIds = queryLogService.GetLogIds(lastLog);
-            sendMailService.SendMail($"SiteDbGroupId:{siteInfo.SiteGroupId} - Failed to sync with logIds: {logIds}");
+            await WriteErrorLog(siteInfo.AliasName, $"Failed to sync with logIds: {logIds}");
         }
+    }
+
+    private static async Task WriteErrorLog(string siteName, string message)
+    {
+        await LogService.ErrorAsync($"Auto Sync Log Sport - Server:{siteName} - {message}");
     }
 }
