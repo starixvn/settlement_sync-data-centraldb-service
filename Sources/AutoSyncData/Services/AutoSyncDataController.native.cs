@@ -8,7 +8,7 @@ public interface AutoSyncDataController
 public class AutoSyncDataControllerImp(
     SyncDataController syncDataController,
     IOptions<AppSettingsKey> appSettingsKey,
-    ScaleOutSettleService scaleOutSettleService)
+    IDynamicRepository repository)
     : AutoSyncDataController
 {
     public void Process()
@@ -16,7 +16,7 @@ public class AutoSyncDataControllerImp(
         var servers = appSettingsKey.Value.SiteDbServer;
         servers.ForEach(server =>
         {
-            var siteGroupId = scaleOutSettleService.GetSiteGroupId(server);
+            var siteGroupId = GetSiteGroupId(server);
             var siteInfo = new SiteInfo
             {
                 AliasName = server,
@@ -25,5 +25,12 @@ public class AutoSyncDataControllerImp(
             Task.Run(() => syncDataController.Process(siteInfo))
                 .ConfigureAwait(false);
         });
+    }
+
+    private async Task<int> GetSiteGroupId(string dbServer)
+    {
+        var criteria = new GetSiteGroupCriteria { DbServer = dbServer };
+        var site = await repository.GetAsync<SiteGroup>(criteria);
+        return site.SiteDbGroupId;
     }
 }

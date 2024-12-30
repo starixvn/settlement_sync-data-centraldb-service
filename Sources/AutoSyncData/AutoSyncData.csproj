@@ -1,30 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Remove="Services\MaintenanceService.native.cs" />
   </ItemGroup>
-
   <ItemGroup>
-
-	  <PackageReference Include="Fanex.Caching" Version="2.2.5" />
+    <PackageReference Include="Fanex.Caching" Version="2.2.7" />
     <PackageReference Include="Fanex.Caching.Redis.AspNetCore" Version="2.2.5" />
-    <PackageReference Include="Fanex.Data.Repository" Version="4.3.0.2" />
-	  <!-- ReSharper disable once VulnerablePackage -->
-    <PackageReference Include="Fanex.Logging.Sentry.RavenClient" Version="1.0.1.2" />
-	  <!-- ReSharper disable once VulnerablePackage -->
-    <PackageReference Include="Fanex.Settlement.ScaleOut" Version="1.4.6.1" />
-	  <!-- ReSharper disable once VulnerablePackage -->
+    <PackageReference Include="Fanex.Data.Repository" Version="4.3.2" />
+    <!-- ReSharper disable once VulnerablePackage -->
+    <PackageReference Include="Fanex.Logging.Sentry.RavenClient" Version="2.0.2" />
+    <!-- ReSharper disable once VulnerablePackage -->
+    <!-- ReSharper disable once VulnerablePackage -->
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
-    <PackageReference Include="ONEbook.UM.AspNetCore" Version="3.1.1.1" />
-	  <!-- ReSharper disable once VulnerablePackage -->
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.0" />
+    <!-- ReSharper disable once VulnerablePackage -->
     <PackageReference Include="RazorEngine.NetCore" Version="3.1.0" />
   </ItemGroup>
-
 </Project>

@@ -51,7 +51,7 @@ public class QueryLogServiceImp(IDynamicRepository repository) : QueryLogService
             return string.Empty;
         }
 
-        var ids = latestLogTable.Rows.OfType<DataRow>().Select(dr => dr.Field<Int64>("LogId")!.ToString());
+        var ids = latestLogTable.Rows.OfType<DataRow>().Select(dr => dr.Field<long>("LogId")!.ToString());
         return string.Join(",", ids);
     }
 
