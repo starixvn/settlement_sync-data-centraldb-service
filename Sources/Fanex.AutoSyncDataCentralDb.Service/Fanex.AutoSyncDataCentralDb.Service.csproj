@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
@@ -33,6 +33,9 @@
     <Content Include="appsettings.PROD.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+<Content Include="appsettings.KLPROD.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="appsettings.SIT.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -45,6 +48,7 @@
     <None Remove="appsettings.json" />
     <None Remove="appsettings.LOCAL.json" />
     <None Remove="appsettings.PROD.json" />
+<None Remove="appsettings.KLPROD.json" />
     <None Remove="appsettings.SIT.json" />
     <None Remove="App_Data\SpName.xml" />
     <None Remove="auto-league-settings.ini" />
