@@ -1,4 +1,6 @@
-﻿namespace AutoSyncData.Services;
+﻿using Fanex.Logging;
+
+namespace AutoSyncData.Services;
 
 public interface SyncDataHandler
 {

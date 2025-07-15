@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
@@ -9,16 +9,11 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Fanex.Caching.Redis.AspNetCore" Version="2.2.5" />
     <!-- ReSharper disable once VulnerablePackage -->
-    <PackageReference Include="Fanex.Data.SqlServer" Version="4.3.2" />
-    <PackageReference Include="Fanex.Logging.Extensions.AspNetCore" Version="1.1.0" />
-    <PackageReference Include="Fanex.Logging.Extensions.Database" Version="1.1.0" />
+    <PackageReference Include="Fanex.Caching.Redis" Version="2.2.8" />
+    <PackageReference Include="Fanex.Data.SqlServer" Version="4.3.4.3" />
+    <PackageReference Include="Fanex.Logging.Extensions.Database" Version="2.0.2.1" />
     <PackageReference Include="Fanex.Logging.Sentry.RavenClient" Version="2.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
-    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="appsettings.DEV.json">
@@ -33,6 +28,9 @@
     <Content Include="appsettings.PROD.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+<Content Include="appsettings.KLPROD.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="appsettings.SIT.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -45,6 +43,7 @@
     <None Remove="appsettings.json" />
     <None Remove="appsettings.LOCAL.json" />
     <None Remove="appsettings.PROD.json" />
+<None Remove="appsettings.KLPROD.json" />
     <None Remove="appsettings.SIT.json" />
     <None Remove="App_Data\SpName.xml" />
     <None Remove="auto-league-settings.ini" />

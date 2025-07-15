@@ -4,6 +4,5 @@ global using AutoSyncData.Models;
 global using Fanex.Caching;
 global using Fanex.Data;
 global using Fanex.Data.Repository;
-global using Fanex.Logging;
 global using Microsoft.Extensions.Options;
 global using System.Data;
