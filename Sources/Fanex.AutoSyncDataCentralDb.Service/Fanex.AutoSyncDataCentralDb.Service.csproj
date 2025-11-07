@@ -11,9 +11,10 @@
   <ItemGroup>
     <!-- ReSharper disable once VulnerablePackage -->
     <PackageReference Include="Fanex.Caching.Redis" Version="2.2.8" />
-    <PackageReference Include="Fanex.Data.SqlServer" Version="4.3.4.3" />
+    <PackageReference Include="Fanex.Data.SqlServer" Version="4.3.4.5" />
     <PackageReference Include="Fanex.Logging.Extensions.Database" Version="2.0.2.1" />
     <PackageReference Include="Fanex.Logging.Sentry.RavenClient" Version="2.0.2" />
+    <PackageReference Include="System.Drawing.Common" Version="9.0.10" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="appsettings.DEV.json">
@@ -23,9 +24,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="appsettings.LOCAL.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="appsettings.PROD.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
 <Content Include="appsettings.KLPROD.json">
@@ -42,7 +40,6 @@
     <None Remove="appsettings.DEV.json" />
     <None Remove="appsettings.json" />
     <None Remove="appsettings.LOCAL.json" />
-    <None Remove="appsettings.PROD.json" />
 <None Remove="appsettings.KLPROD.json" />
     <None Remove="appsettings.SIT.json" />
     <None Remove="App_Data\SpName.xml" />

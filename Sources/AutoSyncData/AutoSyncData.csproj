@@ -13,10 +13,11 @@
   <ItemGroup>
     <PackageReference Include="Fanex.Caching" Version="2.2.8" />
     <PackageReference Include="Fanex.Caching.Redis" Version="2.2.8" />
-    <PackageReference Include="Fanex.Data.Repository" Version="4.3.4.3" />
+    <PackageReference Include="Fanex.Data.Repository" Version="4.3.4.5" />
     <!-- ReSharper disable once VulnerablePackage -->
     <PackageReference Include="Fanex.Logging.Sentry.RavenClient" Version="2.0.2" />
     <!-- ReSharper disable once VulnerablePackage -->
     <PackageReference Include="RazorEngine.NetCore" Version="3.1.0" />
+    <PackageReference Include="System.Drawing.Common" Version="9.0.10" />
   </ItemGroup>
 </Project>
